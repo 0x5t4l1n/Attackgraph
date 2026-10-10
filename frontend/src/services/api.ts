@@ -27,6 +27,7 @@ export interface CrawlConfig {
   request_timeout?: number;
   rate_limit_rps?: number;
   respect_robots_txt?: boolean;
+  allow_private_networks?: boolean;
   auth_cookies?: Record<string, string> | null;
   auth_headers?: Record<string, string> | null;
 }

@@ -109,7 +109,7 @@ class WebCrawler:
         if not self.config.allowed_hosts:
             parsed = urlparse(target)
             if parsed.hostname:
-                self.config.allowed_hosts = [parsed.hostname.lower()]
+                self.config.allowed_hosts = [parsed.netloc.lower()]
 
         cookies = httpx.Cookies()
         if self.config.auth_cookies:
@@ -339,10 +339,11 @@ class WebCrawler:
         if parsed.scheme.lower() not in [s.lower() for s in self.config.allowed_schemes]:
             return False
         hostname = parsed.hostname.lower()
-        if self.config.allowed_hosts and hostname not in [
-            h.lower() for h in self.config.allowed_hosts
-        ]:
-            return False
+        netloc = parsed.netloc.lower()
+        if self.config.allowed_hosts:
+            allowed = [h.lower() for h in self.config.allowed_hosts]
+            if hostname not in allowed and netloc not in allowed:
+                return False
         if not self.config.allow_private_networks and self._is_private(hostname):
             return False
         path = parsed.path or "/"

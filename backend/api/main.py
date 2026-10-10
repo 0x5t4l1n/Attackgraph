@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 from typing import Any
 from urllib.parse import urlparse
 
+import asyncio
+
 from fastapi import FastAPI, HTTPException, UploadFile, File, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, HTMLResponse
@@ -94,6 +96,7 @@ class CrawlConfigRequest(BaseModel):
     request_timeout: float = 30.0
     rate_limit_rps: float = 10.0
     respect_robots_txt: bool = True
+    allow_private_networks: bool = False
     auth_cookies: dict[str, str] | None = None
     auth_headers: dict[str, str] | None = None
 
@@ -237,6 +240,7 @@ async def _run_crawl(session_id: str, project_id: str, config: dict):
             request_timeout=config.get("request_timeout", 30.0),
             rate_limit_rps=config.get("rate_limit_rps", 10.0),
             respect_robots_txt=config.get("respect_robots_txt", True),
+            allow_private_networks=config.get("allow_private_networks", False),
             auth_cookies=config.get("auth_cookies"),
             auth_headers=config.get("auth_headers"),
         )
@@ -579,7 +583,6 @@ async def delete_project(project_id: str, db: AsyncSession = Depends(get_db)):
 async def start_crawl(
     project_id: str,
     config: CrawlConfigRequest,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     await _get_project(project_id, db)
@@ -592,7 +595,7 @@ async def start_crawl(
     await db.flush()
     await db.refresh(session)
     sid = session.id
-    background_tasks.add_task(_run_crawl, sid, project_id, config.model_dump())
+    asyncio.create_task(_run_crawl(sid, project_id, config.model_dump()))
     return {"session_id": sid, "status": "pending"}
 
 
@@ -654,7 +657,6 @@ async def cancel_crawl(project_id: str, session_id: str):
 @app.post("/api/projects/{project_id}/import/burp")
 async def import_burp(
     project_id: str,
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
@@ -670,14 +672,13 @@ async def import_burp(
     await db.flush()
     await db.refresh(imp)
     iid = imp.id
-    background_tasks.add_task(_run_burp_import, iid, project_id, content)
+    asyncio.create_task(_run_burp_import(iid, project_id, content))
     return {"import_id": iid, "status": "pending"}
 
 
 @app.post("/api/projects/{project_id}/import/openapi")
 async def import_openapi(
     project_id: str,
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
@@ -694,7 +695,7 @@ async def import_openapi(
     await db.flush()
     await db.refresh(imp)
     iid = imp.id
-    background_tasks.add_task(_run_openapi_import, iid, project_id, content)
+    asyncio.create_task(_run_openapi_import(iid, project_id, content))
     return {"import_id": iid, "status": "pending"}
 
 

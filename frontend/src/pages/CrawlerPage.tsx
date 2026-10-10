@@ -14,6 +14,7 @@ export default function CrawlerPage() {
   const [maxPages, setMaxPages] = useState(500);
   const [rateLimit, setRateLimit] = useState(10);
   const [respectRobots, setRespectRobots] = useState(true);
+  const [allowPrivate, setAllowPrivate] = useState(false);
 
   const loadSessions = () => {
     if (!projectId) return;
@@ -38,6 +39,7 @@ export default function CrawlerPage() {
         max_pages: maxPages,
         rate_limit_rps: rateLimit,
         respect_robots_txt: respectRobots,
+        allow_private_networks: allowPrivate,
       })
       .then(() => {
         loadSessions();
@@ -96,6 +98,10 @@ export default function CrawlerPage() {
             <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <input type="checkbox" checked={respectRobots} onChange={(e) => setRespectRobots(e.target.checked)} style={{ width: 'auto' }} />
               Respect robots.txt
+            </label>
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.4rem' }}>
+              <input type="checkbox" checked={allowPrivate} onChange={(e) => setAllowPrivate(e.target.checked)} style={{ width: 'auto' }} />
+              Allow private networks (localhost, 127.x, 10.x)
             </label>
           </div>
           <button type="submit" className="btn-primary" style={{ marginTop: '1rem', width: '100%' }} disabled={submitting}>
