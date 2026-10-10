@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<items burpVersion="2024.1" exportTime="Sat Oct 11 2026">
+  <item>
+    <time>Sat Oct 11 10:00:00 UTC 2026</time>
+    <url>https://example.com/api/users</url>
+    <host ip="93.184.216.34">example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/api/users</path>
+    <extension>null</extension>
+    <request base64="true">R0VUIC9hcGkvdXNlcnMgSFRUUC8xLjENCkhvc3Q6IGV4YW1wbGUuY29tDQpBY2NlcHQ6IGFwcGxpY2F0aW9uL2pzb24NCkF1dGhvcml6YXRpb246IEJlYXJlciB0ZXN0LXRva2VuLTEyMw0KDQo=</request>
+    <status>200</status>
+    <responselength>256</responselength>
+    <mimetype>JSON</mimetype>
+    <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCg0KW3siaWQiOjEsIm5hbWUiOiJBbGljZSJ9LHsiaWQiOjIsIm5hbWUiOiJCb2IifV0=</response>
+    <comment>User listing endpoint</comment>
+  </item>
+  <item>
+    <time>Sat Oct 11 10:00:01 UTC 2026</time>
+    <url>https://example.com/api/users/1</url>
+    <host ip="93.184.216.34">example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/api/users/1</path>
+    <extension>null</extension>
+    <request base64="true">R0VUIC9hcGkvdXNlcnMvMSBIVFRQLzEuMQ0KSG9zdDogZXhhbXBsZS5jb20NCkFjY2VwdDogYXBwbGljYXRpb24vanNvbg0KDQo=</request>
+    <status>200</status>
+    <responselength>128</responselength>
+    <mimetype>JSON</mimetype>
+    <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCg0KeyJpZCI6MSwibmFtZSI6IkFsaWNlIiwiZW1haWwiOiJhbGljZUBleGFtcGxlLmNvbSJ9</response>
+    <comment></comment>
+  </item>
+  <item>
+    <time>Sat Oct 11 10:00:02 UTC 2026</time>
+    <url>https://example.com/admin/settings</url>
+    <host ip="93.184.216.34">example.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method>GET</method>
+    <path>/admin/settings</path>
+    <extension>null</extension>
+    <request base64="false">GET /admin/settings HTTP/1.1
+Host: example.com
+Accept: text/html
+
+</request>
+    <status>200</status>
+    <responselength>512</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false">HTTP/1.1 200 OK
+Content-Type: text/html
+
+&lt;html&gt;&lt;body&gt;Admin Panel&lt;/body&gt;&lt;/html&gt;</response>
+    <comment>Admin panel - no auth!</comment>
+  </item>
+</items>
