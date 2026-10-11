@@ -72,14 +72,22 @@ document.querySelectorAll('.install-tab').forEach(tab => {
 });
 
 // ── Scroll fade-in ─────────────────────────────────────────
+const fadeEls = document.querySelectorAll('.fade-in');
+
 if ('IntersectionObserver' in window) {
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
     });
-  }, { threshold: 0.06 });
-  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  }, { threshold: 0.04, rootMargin: '0px 0px -40px 0px' });
+  fadeEls.forEach(el => obs.observe(el));
+} else {
+  // No observer support — show everything immediately
+  fadeEls.forEach(el => el.classList.add('visible'));
 }
+
+// Safety net: force all visible after 1.2s regardless
+setTimeout(() => fadeEls.forEach(el => el.classList.add('visible')), 1200);
 
 // ── Active nav on scroll ───────────────────────────────────
 if ('IntersectionObserver' in window) {
