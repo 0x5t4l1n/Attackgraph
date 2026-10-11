@@ -10,7 +10,14 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Custom redirects and headers
+# Redirect default Netlify subdomain to custom domain
+[[redirects]]
+  from = "https://fluffy-donut-5ea1b7.netlify.app/*"
+  to = "https://attackgraph.w4nn4d13.tech/:splat"
+  status = 301
+  force = true
+
+# Custom 404
 [[redirects]]
   from = "/*"
   to = "/404.html"
