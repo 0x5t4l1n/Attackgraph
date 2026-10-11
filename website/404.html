@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404 — Page not found · AttackGraph</title>
+  <title>Page Not Found · AttackGraph</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="style.css" />
-  <script>(function(){ document.documentElement.setAttribute('data-theme', localStorage.getItem('ag-theme') || 'dark'); })();</script>
+  <script>(function(){ document.documentElement.setAttribute('data-theme', localStorage.getItem('ag-theme')||'light'); })();</script>
 </head>
 <body>
   <div class="error-page">
-    <div class="error-code">404<span class="cursor" aria-hidden="true"></span></div>
-    <h1 style="margin-bottom:1rem">Endpoint not found</h1>
-    <p style="max-width:420px; margin:0 auto 0.5rem">This page doesn't exist — or it was undocumented and AttackGraph would flag it.</p>
-    <p style="font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:2rem">// hypothesis: user followed a broken link</p>
-    <a href="/" class="btn btn-primary">← Return to base</a>
+    <div class="error-num">404</div>
+    <div class="rule" style="max-width:200px;margin:.5rem auto 1.5rem"><span class="rule-diamond">◆</span></div>
+    <h2 style="margin-bottom:0.75rem;font-style:italic">Page not found</h2>
+    <p style="font-style:italic;margin-bottom:2rem;max-width:400px">This endpoint doesn't exist — or it was undocumented and AttackGraph would have flagged it.</p>
+    <a href="/" class="btn btn-primary">Return home</a>
   </div>
-  <script src="script.js"></script>
 </body>
 </html>

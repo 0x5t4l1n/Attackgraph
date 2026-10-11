@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AttackGraph — Map · Analyze · Find</title>
-  <meta name="description" content="AttackGraph is an open-source, local-first application security testing platform. Crawl web targets, build application graphs, and generate evidence-backed attack paths and test plans." />
-  <meta name="keywords" content="application security, pentest, attack surface mapping, appsec, graph analysis, security research, open source, linux" />
+  <meta name="description" content="AttackGraph is an open-source, local-first application security testing platform. Crawl web targets, build application graphs, and generate evidence-backed attack paths." />
   <meta property="og:title" content="AttackGraph — Map · Analyze · Find" />
   <meta property="og:description" content="Graph-first application security testing platform for Linux." />
   <meta property="og:image" content="images/attackgraph-banner.png" />
@@ -13,21 +12,15 @@
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="style.css" />
-  <!-- Prevent flash of wrong theme -->
-  <script>
-    (function(){
-      var t = localStorage.getItem('ag-theme') || 'dark';
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
+  <script>(function(){ var t=localStorage.getItem('ag-theme')||'light'; document.documentElement.setAttribute('data-theme',t); })();</script>
 </head>
 <body>
 
-<!-- ── Nav ── -->
-<nav role="navigation" aria-label="Main navigation">
+<!-- ── Navigation ── -->
+<nav>
   <div class="nav-inner">
-    <a href="/" class="nav-brand" aria-label="AttackGraph home">
-      <img src="images/logo.png" alt="" aria-hidden="true" />
+    <a href="/" class="nav-brand">
+      <img src="images/logo.png" alt="AttackGraph" />
       AttackGraph
     </a>
     <div class="nav-links" id="nav-links">
@@ -36,91 +29,80 @@
       <a href="#install">Install</a>
       <a href="#roadmap">Roadmap</a>
       <a href="https://github.com/0x5t4l1n/Attackgraph" target="_blank" rel="noopener">GitHub</a>
-      <button class="theme-btn" id="theme-toggle" aria-label="Toggle theme">
-        <span class="theme-icon" id="theme-icon">☀</span>
-        <span id="theme-label">LIGHT</span>
+      <button class="theme-btn" id="theme-toggle" aria-label="Switch theme">
+        <span id="theme-label">Dark Mode</span>
       </button>
-      <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" target="_blank" rel="noopener" class="nav-cta">⬇ Download</a>
+      <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" target="_blank" rel="noopener" class="nav-cta">Download</a>
     </div>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <button class="theme-btn" id="theme-toggle-mobile" aria-label="Toggle theme" style="display:none">
-        <span class="theme-icon" id="theme-icon-mobile">☀</span>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <button class="theme-btn" id="theme-toggle-mobile" style="display:none" aria-label="Switch theme">
+        <span id="theme-label-mobile">Dark</span>
       </button>
-      <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <button class="nav-hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
   </div>
 </nav>
 
-<div class="mobile-menu" id="mobile-menu" role="menu">
-  <a href="#features" role="menuitem">Features</a>
-  <a href="#workflow" role="menuitem">Workflow</a>
-  <a href="#install" role="menuitem">Install</a>
-  <a href="#roadmap" role="menuitem">Roadmap</a>
-  <a href="https://github.com/0x5t4l1n/Attackgraph" target="_blank" rel="noopener" role="menuitem">GitHub</a>
-  <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" target="_blank" rel="noopener" role="menuitem">⬇ Download v1.0.0</a>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#features">Features</a>
+  <a href="#workflow">Workflow</a>
+  <a href="#install">Install</a>
+  <a href="#roadmap">Roadmap</a>
+  <a href="https://github.com/0x5t4l1n/Attackgraph" target="_blank" rel="noopener">GitHub</a>
+  <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" target="_blank" rel="noopener">Download v1.0.0</a>
 </div>
 
+<main>
 <!-- ── Hero ── -->
-<main id="main">
-<section class="hero">
-  <div class="wrap">
-    <!-- ASCII art — dark theme only -->
-    <div class="hero-ascii" aria-hidden="true">
-  ██████╗  ████████╗████████╗ █████╗  ██████╗██╗  ██╗ ██████╗ ██████╗  █████╗ ██████╗ ██╗  ██╗
-  ██╔══██╗ ╚══██╔══╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝██╔════╝ ██╔══██╗██╔══██╗██╔══██╗██║  ██║
-  ███████║    ██║      ██║   ███████║██║     █████╔╝ ██║  ███╗██████╔╝███████║██████╔╝███████║
-  ██╔══██║    ██║      ██║   ██╔══██║██║     ██╔═██╗ ██║   ██║██╔══██╗██╔══██║██╔═══╝ ██╔══██║
-  ██║  ██║    ██║      ██║   ██║  ██║╚██████╗██║  ██╗╚██████╔╝██║  ██║██║  ██║██║     ██║  ██║
-  ╚═╝  ╚═╝    ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝</div>
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Open Source · Linux · v1.0.0</div>
 
-    <div class="hero-eyebrow">
-      ▸ Open-Source · Local-First · Linux Desktop · v1.0.0
-    </div>
+      <h1>Map. Analyze.<br><em>Find.</em></h1>
 
-    <h1>Map. Analyze. Find.<span class="cursor" aria-hidden="true"></span></h1>
+      <div class="hero-subtitle">Graph-first application security testing</div>
 
-    <div class="hero-tagline">// graph-first application security testing</div>
+      <p>
+        AttackGraph is a local-first security research platform.
+        Crawl your authorized target, model it as a directed graph,
+        apply deterministic analysis rules, and deliver professional
+        security reports — entirely on your own machine.
+      </p>
 
-    <p>
-      AttackGraph is a local-first application security testing platform.
-      Discover endpoints, model the attack surface as a directed graph,
-      apply deterministic security rules, and export professional reports —
-      all on your machine, with no cloud dependencies.
-    </p>
-
-    <div class="hero-actions">
-      <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">
-        ⬇&nbsp; Download v1.0.0
-      </a>
-      <a href="https://github.com/0x5t4l1n/Attackgraph" class="btn btn-ghost" target="_blank" rel="noopener">
-        ★&nbsp; View on GitHub
-      </a>
-    </div>
-
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hero-stat-value">88</div>
-        <div class="hero-stat-label">// tests passing</div>
+      <div class="hero-actions">
+        <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">
+          Download v1.0.0
+        </a>
+        <a href="https://github.com/0x5t4l1n/Attackgraph" class="btn btn-ghost" target="_blank" rel="noopener">
+          View on GitHub
+        </a>
       </div>
-      <div class="hero-stat">
-        <div class="hero-stat-value">10</div>
-        <div class="hero-stat-label">// analysis rules</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-value">3</div>
-        <div class="hero-stat-label">// report formats</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-value">0</div>
-        <div class="hero-stat-label">// cloud dependencies</div>
+
+      <div class="hero-meta">
+        <div>
+          <span class="hero-stat-val">88</span>
+          <span class="hero-stat-lbl">Tests Passing</span>
+        </div>
+        <div>
+          <span class="hero-stat-val">10</span>
+          <span class="hero-stat-lbl">Analysis Rules</span>
+        </div>
+        <div>
+          <span class="hero-stat-val">3</span>
+          <span class="hero-stat-lbl">Report Formats</span>
+        </div>
+        <div>
+          <span class="hero-stat-val">0</span>
+          <span class="hero-stat-lbl">Cloud Dependencies</span>
+        </div>
       </div>
     </div>
 
-    <div class="hero-banner">
-      <img src="images/attackgraph-banner.png"
-           alt="AttackGraph application interface showing the security dashboard with endpoints, findings, attack paths, and interactive graph" loading="eager" />
+    <div class="hero-image">
+      <img src="images/attackgraph-banner.png" alt="AttackGraph dashboard interface" loading="eager" />
     </div>
   </div>
 </section>
@@ -128,57 +110,58 @@
 <!-- ── Features ── -->
 <section id="features" class="bg-alt">
   <div class="wrap">
-    <div class="section-header">
-      <div class="ornament">// capabilities</div>
+    <div class="section-header fade-in">
+      <span class="section-label">Capabilities</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
       <h2>Everything you need for application security research</h2>
-      <p>A complete workflow from discovery to reporting, with no cloud dependencies and no data leaving your machine.</p>
+      <p>A complete workflow from discovery to reporting, with no data leaving your machine.</p>
     </div>
 
     <div class="grid-3">
-      <div class="card">
-        <div class="card-icon">🕷</div>
+      <div class="card fade-in">
+        <span class="card-icon">🕷</span>
         <h3>Active Web Crawler</h3>
-        <p>Async crawler with scope enforcement, robots.txt compliance, rate limiting, form discovery, and configurable depth, concurrency, and rate limit.</p>
+        <p>Async crawler with scope enforcement, robots.txt compliance, rate limiting, form discovery, and configurable depth and concurrency.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">📡</div>
+      <div class="card fade-in">
+        <span class="card-icon">📡</span>
         <h3>Burp Suite Import</h3>
-        <p>Parse Burp Suite XML HTTP history exports. Requests parsed, credential headers stripped, cookies redacted, endpoints normalized and deduplicated.</p>
+        <p>Parse Burp Suite XML HTTP history. Requests are parsed, credential headers stripped, cookies redacted, and endpoints normalized.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">📋</div>
+      <div class="card fade-in">
+        <span class="card-icon">📋</span>
         <h3>OpenAPI Import</h3>
-        <p>Import OpenAPI 2.0, 3.0, and 3.1 specifications. Endpoints extracted and cross-referenced against observed traffic.</p>
+        <p>Import OpenAPI 2.0, 3.0, and 3.1 specifications. Endpoints are extracted and cross-referenced against observed traffic.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">🗺</div>
+      <div class="card fade-in">
+        <span class="card-icon">🗺</span>
         <h3>Application Graph</h3>
-        <p>Typed directed graph with host, endpoint, parameter, and auth nodes. Every edge tracked with evidence source and confidence score.</p>
+        <p>Typed directed graph with host, endpoint, parameter, and auth nodes. Every edge is tracked with evidence source and confidence score.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">🔍</div>
+      <div class="card fade-in">
+        <span class="card-icon">🔍</span>
         <h3>Security Analysis</h3>
-        <p>10 deterministic rules generate evidence-backed security hypotheses. Findings include confidence %, assumptions, affected endpoints, and reproduction steps.</p>
+        <p>10 deterministic rules generate evidence-backed security hypotheses with confidence scores, assumptions, and reproduction steps.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">⚡</div>
+      <div class="card fade-in">
+        <span class="card-icon">⚡</span>
         <h3>Attack Paths</h3>
-        <p>Graph traversal discovers candidate paths from entry points to sensitive operations, scored by priority and confidence.</p>
+        <p>Graph traversal discovers candidate paths from entry points to sensitive operations, prioritized by confidence.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">📝</div>
+      <div class="card fade-in">
+        <span class="card-icon">📝</span>
         <h3>Test Plans</h3>
-        <p>Structured procedures with preconditions, step-by-step instructions, expected secure behavior, evidence requirements, and cleanup steps.</p>
+        <p>Structured procedures with preconditions, instructions, expected behavior, evidence requirements, and cleanup steps.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">📄</div>
+      <div class="card fade-in">
+        <span class="card-icon">📄</span>
         <h3>Security Reports</h3>
-        <p>Export in Markdown, JSON, and HTML. Reports clearly distinguish confirmed findings from unvalidated hypotheses. Includes limitations disclaimer.</p>
+        <p>Export in Markdown, JSON, and HTML. Reports clearly distinguish confirmed findings from unvalidated hypotheses.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">🤖</div>
-        <h3>AI Assistant (Optional)</h3>
-        <p>Works with Ollama (local, no API key), OpenAI, Google Gemini, and OpenRouter. All core features work without AI — it is an enhancement only.</p>
+      <div class="card fade-in">
+        <span class="card-icon">🤖</span>
+        <h3>AI Assistant</h3>
+        <p>Optional. Works with Ollama, OpenAI, Gemini, and OpenRouter. All core features work without AI — it is an enhancement only.</p>
       </div>
     </div>
   </div>
@@ -186,68 +169,69 @@
 
 <!-- ── Workflow ── -->
 <section id="workflow">
-  <div class="wrap-narrow">
-    <div class="section-header">
-      <div class="ornament">// workflow</div>
-      <h2>From discovery to report in 8 steps</h2>
-      <p>A structured assessment workflow with clear separation between observed facts and hypotheses at every step.</p>
+  <div class="wrap">
+    <div class="section-header fade-in">
+      <span class="section-label">Methodology</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
+      <h2>A structured path from discovery to report</h2>
+      <p>Eight steps that move from evidence collection through graph analysis to validated findings.</p>
     </div>
 
     <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
+      <div class="step fade-in">
+        <div class="step-num">I</div>
         <div>
-          <h3>Create a project and define scope</h3>
-          <p>Configure the target URL, allowed hosts, schemes, and excluded paths. All crawling and analysis respects these boundaries — nothing is collected outside scope.</p>
+          <h3>Define project and scope</h3>
+          <p>Configure the target URL, allowed hosts, schemes, and excluded paths. Every subsequent step respects these boundaries.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">02</div>
+      <div class="step fade-in">
+        <div class="step-num">II</div>
         <div>
           <h3>Collect application data</h3>
-          <p>Run the active crawler on your authorized target, import Burp Suite HTTP history, or provide an OpenAPI specification. Use any combination of the three.</p>
+          <p>Run the active crawler, import Burp Suite HTTP history, or provide an OpenAPI specification. Combine all three.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">03</div>
+      <div class="step fade-in">
+        <div class="step-num">III</div>
         <div>
-          <h3>Build the application graph <span class="step-badge automated">automated</span></h3>
-          <p>Click Build Graph. A typed directed graph is generated from collected observations. Each node carries its evidence source, type, and confidence score.</p>
+          <h3>Build the application graph <span class="step-badge automated">Automated</span></h3>
+          <p>Click Build Graph. A typed directed graph is generated from collected observations, each node carrying confidence and source.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">04</div>
+      <div class="step fade-in">
+        <div class="step-num">IV</div>
         <div>
-          <h3>Run security analysis <span class="step-badge automated">automated</span></h3>
-          <p>10 deterministic rules analyze the graph and observations. All findings start as unvalidated hypotheses — no false confirmations.</p>
+          <h3>Run security analysis <span class="step-badge automated">Automated</span></h3>
+          <p>Ten deterministic rules analyze the graph. All findings begin as unvalidated hypotheses — never false confirmations.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">05</div>
+      <div class="step fade-in">
+        <div class="step-num">V</div>
         <div>
           <h3>Review findings and attack paths</h3>
-          <p>Examine each finding with its reasoning, affected endpoints, assumptions, confidence, and reproduction steps. Review candidate attack paths with priority scores.</p>
+          <p>Examine each finding's reasoning, affected endpoints, assumptions, and reproduction steps. Review prioritized attack paths.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">06</div>
+      <div class="step fade-in">
+        <div class="step-num">VI</div>
         <div>
           <h3>Execute approved test plans</h3>
-          <p>Follow generated test procedures on authorized targets. Update finding status as you validate, dismiss, or escalate each hypothesis.</p>
+          <p>Follow structured procedures on authorized targets. Update finding status as you validate or dismiss each hypothesis.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">07</div>
+      <div class="step fade-in">
+        <div class="step-num">VII</div>
         <div>
           <h3>Generate the security report</h3>
-          <p>Export as Markdown, JSON, or HTML. Report includes executive summary, endpoint inventory, findings, attack paths, test plans, and limitations disclaimer.</p>
+          <p>Export as Markdown, JSON, or HTML with executive summary, findings, attack paths, test plans, and a limitations disclaimer.</p>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">08</div>
+      <div class="step fade-in">
+        <div class="step-num">VIII</div>
         <div>
-          <h3>AI-assisted analysis <span class="step-badge optional">optional</span></h3>
-          <p>If an AI provider is configured, the AI assistant summarizes the application graph. Only redacted graph summaries are transmitted — never raw requests or credentials.</p>
+          <h3>AI-assisted analysis <span class="step-badge optional">Optional</span></h3>
+          <p>If configured, the AI assistant summarizes the graph. Only redacted summaries are transmitted — never raw requests or credentials.</p>
         </div>
       </div>
     </div>
@@ -257,57 +241,45 @@
 <!-- ── Install ── -->
 <section id="install" class="bg-alt">
   <div class="wrap">
-    <div class="section-header">
-      <div class="ornament">// installation</div>
-      <h2>Get started on Linux</h2>
-      <p>Available on Arch Linux via AUR, portable AppImage, .deb package, or build from source.</p>
+    <div class="section-header fade-in">
+      <span class="section-label">Installation</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
+      <h2>Available on Arch Linux, AppImage, and .deb</h2>
     </div>
 
-    <div class="install-tabs" role="tablist" aria-label="Installation methods">
-      <button class="install-tab active" role="tab" aria-selected="true" aria-controls="tab-aur" data-tab="aur">AUR (Arch)</button>
-      <button class="install-tab" role="tab" aria-selected="false" aria-controls="tab-appimage" data-tab="appimage">AppImage</button>
-      <button class="install-tab" role="tab" aria-selected="false" aria-controls="tab-deb" data-tab="deb">.deb</button>
-      <button class="install-tab" role="tab" aria-selected="false" aria-controls="tab-source" data-tab="source">Source</button>
+    <div class="install-tabs" role="tablist">
+      <button class="install-tab active" role="tab" aria-selected="true" data-tab="aur">AUR (Arch Linux)</button>
+      <button class="install-tab" role="tab" aria-selected="false" data-tab="appimage">AppImage</button>
+      <button class="install-tab" role="tab" aria-selected="false" data-tab="deb">Debian / Ubuntu</button>
+      <button class="install-tab" role="tab" aria-selected="false" data-tab="source">Build from Source</button>
     </div>
 
-    <div id="tab-aur" class="install-pane active" role="tabpanel">
-      <p style="margin-bottom:1rem; font-size:.875rem">No Python, Rust, or Node.js required. The AUR package bundles everything.</p>
+    <div id="tab-aur" class="install-pane active">
+      <p style="margin-bottom:1.5rem;font-style:italic">No Python, Rust, or Node.js required — the package includes a bundled backend.</p>
       <div class="install-grid">
-        <div>
-          <p style="margin-bottom:.6rem; font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted)">yay</p>
-          <pre>yay -S attackgraph-bin</pre>
-        </div>
-        <div>
-          <p style="margin-bottom:.6rem; font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted)">paru</p>
-          <pre>paru -S attackgraph-bin</pre>
-        </div>
-        <div>
-          <p style="margin-bottom:.6rem; font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted)">manual</p>
-          <pre>git clone https://aur.archlinux.org/attackgraph-bin.git
-cd attackgraph-bin && makepkg -si</pre>
-        </div>
-        <div>
-          <p style="margin-bottom:.6rem; font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted)">launch</p>
-          <pre>attackgraph</pre>
-        </div>
+        <div><span class="install-label">Using yay</span><pre>yay -S attackgraph-bin</pre></div>
+        <div><span class="install-label">Using paru</span><pre>paru -S attackgraph-bin</pre></div>
+        <div><span class="install-label">Manual</span><pre>git clone https://aur.archlinux.org/attackgraph-bin.git
+cd attackgraph-bin && makepkg -si</pre></div>
+        <div><span class="install-label">Launch</span><pre>attackgraph</pre></div>
       </div>
     </div>
 
-    <div id="tab-appimage" class="install-pane" role="tabpanel">
-      <p style="margin-bottom:1rem; font-size:.875rem">Portable — runs on any Linux x86_64 without installation.</p>
+    <div id="tab-appimage" class="install-pane">
+      <p style="margin-bottom:1.5rem;font-style:italic">Portable — runs on any Linux x86_64 without installation.</p>
       <pre>wget https://github.com/0x5t4l1n/Attackgraph/releases/download/v1.0.0/AttackGraph_1.0.0_amd64.AppImage
 chmod +x AttackGraph_1.0.0_amd64.AppImage
 ./AttackGraph_1.0.0_amd64.AppImage</pre>
     </div>
 
-    <div id="tab-deb" class="install-pane" role="tabpanel">
+    <div id="tab-deb" class="install-pane">
       <pre>wget https://github.com/0x5t4l1n/Attackgraph/releases/download/v1.0.0/AttackGraph_1.0.0_amd64.deb
 sudo dpkg -i AttackGraph_1.0.0_amd64.deb
 attackgraph</pre>
     </div>
 
-    <div id="tab-source" class="install-pane" role="tabpanel">
-      <p style="margin-bottom:1rem; font-size:.875rem">Requires Python 3.11+, Node.js 18+, Rust 1.75+, webkit2gtk-4.1</p>
+    <div id="tab-source" class="install-pane">
+      <p style="margin-bottom:1.5rem;font-style:italic">Requires Python 3.11+, Node.js 18+, Rust 1.75+, webkit2gtk-4.1</p>
       <pre>git clone https://github.com/0x5t4l1n/Attackgraph.git
 cd Attackgraph
 python3 -m venv .venv && source .venv/bin/activate
@@ -316,7 +288,7 @@ cd frontend && npm install
 cargo tauri dev</pre>
     </div>
 
-    <div class="callout" style="margin-top:2rem">
+    <div class="callout" style="margin-top:2.5rem" role="note">
       <span>⚠</span>
       <p><strong>Authorized testing only.</strong> Only use AttackGraph against systems you own or have explicit written permission to test. The crawler respects <code>robots.txt</code> by default.</p>
     </div>
@@ -326,21 +298,22 @@ cargo tauri dev</pre>
 <!-- ── Tech ── -->
 <section id="tech">
   <div class="wrap">
-    <div class="section-header">
-      <div class="ornament">// stack</div>
-      <h2>Built with the right tools</h2>
+    <div class="section-header fade-in">
+      <span class="section-label">Technology</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
+      <h2>Built with proven tools</h2>
     </div>
     <div class="tech-grid" style="justify-content:center">
-      <div class="tech-badge"><span class="dot" style="background:#3776ab"></span> Python 3.11+</div>
-      <div class="tech-badge"><span class="dot" style="background:#009688"></span> FastAPI</div>
-      <div class="tech-badge"><span class="dot" style="background:#61dafb"></span> React 19</div>
-      <div class="tech-badge"><span class="dot" style="background:#24c8db"></span> Tauri 2</div>
-      <div class="tech-badge"><span class="dot" style="background:#f46623"></span> SQLite</div>
-      <div class="tech-badge"><span class="dot" style="background:#ce422b"></span> Rust</div>
-      <div class="tech-badge"><span class="dot" style="background:#646cff"></span> Vite</div>
-      <div class="tech-badge"><span class="dot" style="background:#3178c6"></span> TypeScript</div>
-      <div class="tech-badge"><span class="dot" style="background:#89e051"></span> asyncio</div>
-      <div class="tech-badge"><span class="dot" style="background:#1793d1"></span> AUR</div>
+      <div class="tech-badge"><span class="dot" style="background:#3776ab"></span>Python 3.11</div>
+      <div class="tech-badge"><span class="dot" style="background:#009688"></span>FastAPI</div>
+      <div class="tech-badge"><span class="dot" style="background:#61dafb"></span>React 19</div>
+      <div class="tech-badge"><span class="dot" style="background:#24c8db"></span>Tauri 2</div>
+      <div class="tech-badge"><span class="dot" style="background:#7a6652"></span>SQLite</div>
+      <div class="tech-badge"><span class="dot" style="background:#ce422b"></span>Rust</div>
+      <div class="tech-badge"><span class="dot" style="background:#646cff"></span>Vite</div>
+      <div class="tech-badge"><span class="dot" style="background:#3178c6"></span>TypeScript</div>
+      <div class="tech-badge"><span class="dot" style="background:#3fb950"></span>asyncio</div>
+      <div class="tech-badge"><span class="dot" style="background:#1793d1"></span>AUR</div>
     </div>
   </div>
 </section>
@@ -348,72 +321,70 @@ cargo tauri dev</pre>
 <!-- ── Roadmap ── -->
 <section id="roadmap" class="bg-alt">
   <div class="wrap">
-    <div class="section-header">
-      <div class="ornament">// roadmap</div>
-      <h2>Status and what's coming</h2>
+    <div class="section-header fade-in">
+      <span class="section-label">Roadmap</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
+      <h2>Where things stand</h2>
     </div>
-    <div class="grid-2" style="max-width:900px; margin:0 auto; gap:3rem">
-      <div>
-        <h3 style="margin-bottom:1.5rem; font-size:.85rem; text-transform:uppercase; letter-spacing:.12em; color:var(--success)">
-          ▸ Implemented — v1.0.0
-        </h3>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Active async web crawler</strong><p>Scope enforcement, robots.txt, rate limiting</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Burp Suite XML import</strong><p>With credential redaction</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>OpenAPI 2.0 / 3.0 / 3.1 import</strong></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Typed application graph</strong><p>Host, endpoint, parameter, auth nodes</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>10 deterministic security rules</strong></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Attack-path traversal + scoring</strong></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Test-plan generator</strong></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Markdown / JSON / HTML reports</strong></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Linux desktop (Tauri 2 + AppImage + AUR)</strong></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot done"></div><div><strong>Optional AI assistant</strong><p>Ollama, OpenAI, Gemini, OpenRouter</p></div></div>
+    <div class="grid-2">
+      <div class="fade-in">
+        <h3 style="margin-bottom:1.5rem;font-size:.85rem;font-family:var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">Implemented — v1.0.0</h3>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Active async web crawler</strong><p>Scope enforcement, robots.txt, rate limiting</p></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Burp Suite XML import</strong><p>With credential redaction</p></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>OpenAPI 2.0 / 3.0 / 3.1</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Typed application graph</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>10 deterministic security rules</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Attack-path traversal and scoring</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Test-plan generator</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Markdown / JSON / HTML reports</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Linux desktop app (Tauri 2)</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph">✓</div><div><strong>Optional AI assistant</strong></div></div>
       </div>
-      <div>
-        <h3 style="margin-bottom:1.5rem; font-size:.85rem; text-transform:uppercase; letter-spacing:.12em; color:var(--text-muted)">
-          ◌ Planned
-        </h3>
-        <div class="roadmap-item"><div class="roadmap-dot planned"></div><div><strong>Frontend unit tests</strong><p>Vitest + React Testing Library</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot planned"></div><div><strong>Session / auth token tracking</strong><p>Correlate auth across requests</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot planned"></div><div><strong>Dynamic crawling (Playwright)</strong><p>SPA + JavaScript-rendered pages</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot planned"></div><div><strong>Nuclei template generator</strong><p>Auto-generate from findings</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot planned"></div><div><strong>Custom rule plugin API</strong><p>User-defined analysis rules</p></div></div>
-        <div class="roadmap-item"><div class="roadmap-dot planned"></div><div><strong>Multi-project reporting</strong><p>Aggregate findings across projects</p></div></div>
+      <div class="fade-in">
+        <h3 style="margin-bottom:1.5rem;font-size:.85rem;font-family:var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted)">Planned</h3>
+        <div class="roadmap-item"><div class="roadmap-glyph" style="color:var(--text-muted)">○</div><div><strong>Frontend unit tests</strong><p>Vitest + React Testing Library</p></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph" style="color:var(--text-muted)">○</div><div><strong>Session and auth token tracking</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph" style="color:var(--text-muted)">○</div><div><strong>Dynamic crawling with Playwright</strong><p>SPA and JavaScript-rendered pages</p></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph" style="color:var(--text-muted)">○</div><div><strong>Nuclei template generation</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph" style="color:var(--text-muted)">○</div><div><strong>Custom analysis rule plugin API</strong></div></div>
+        <div class="roadmap-item"><div class="roadmap-glyph" style="color:var(--text-muted)">○</div><div><strong>Multi-project reporting</strong></div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Security ── -->
+<!-- ── Responsible use ── -->
 <section id="security">
-  <div class="wrap-narrow">
-    <div class="section-header">
-      <div class="ornament">// responsible use</div>
+  <div class="wrap">
+    <div class="section-header fade-in">
+      <span class="section-label">Responsible Use</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
       <h2>Security and ethics</h2>
     </div>
-    <div class="callout" style="margin-bottom:2rem; border-left-color:var(--warning)">
+    <div class="callout fade-in" style="margin-bottom:2.5rem">
       <span>⚠</span>
-      <p><strong>AttackGraph is designed for authorized security testing only.</strong> Only use it against systems you own or have explicit written permission to test. Unauthorized testing is illegal and unethical regardless of the tools used.</p>
+      <p><strong>AttackGraph is for authorized security testing only.</strong> Only use it against systems you own or have explicit written permission to test. Unauthorized testing is illegal regardless of the tools used.</p>
     </div>
     <div class="grid-2">
-      <div class="card">
-        <div class="card-icon">🔒</div>
+      <div class="card fade-in">
+        <span class="card-icon">🔒</span>
         <h3>Local-first by design</h3>
         <p>All data stored at <code>~/.local/share/attackgraph/</code>. No telemetry, no cloud sync, no external transmission except optional AI API calls.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">⚖</div>
+      <div class="card fade-in">
+        <span class="card-icon">⚖</span>
         <h3>Hypothesis-based findings</h3>
-        <p>All findings are unvalidated hypotheses until manually confirmed. AttackGraph never claims a vulnerability is confirmed from passive analysis alone.</p>
+        <p>All findings are unvalidated hypotheses until manually confirmed. No finding is ever automatically marked as confirmed.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">🤖</div>
+      <div class="card fade-in">
+        <span class="card-icon">🤖</span>
         <h3>Safe AI integration</h3>
         <p>AI calls transmit only redacted graph summaries — never raw HTTP requests, credentials, session tokens, or full responses.</p>
       </div>
-      <div class="card">
-        <div class="card-icon">🚫</div>
+      <div class="card fade-in">
+        <span class="card-icon">🚫</span>
         <h3>Scope enforcement</h3>
-        <p>Crawler enforces your configured scope at every step. Requests outside allowed hosts are never made. Robots.txt respected by default.</p>
+        <p>The crawler enforces your configured scope at every request. Robots.txt is respected by default.</p>
       </div>
     </div>
   </div>
@@ -421,23 +392,25 @@ cargo tauri dev</pre>
 
 <!-- ── CTA ── -->
 <div class="cta-band">
-  <div class="wrap-narrow">
-    <div class="vdivider">◆</div>
-    <h2>Start mapping your attack surface</h2>
-    <p>Open-source · Local-first · Free forever · Licensed under AGPL-3.0</p>
-    <div class="hero-actions" style="justify-content:center">
-      <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">⬇&nbsp; Download v1.0.0</a>
-      <a href="https://github.com/0x5t4l1n/Attackgraph" class="btn btn-ghost" target="_blank" rel="noopener">★&nbsp; View Source</a>
-    </div>
+  <span class="section-label">Get Started</span>
+  <div class="rule" style="max-width:400px;margin:.75rem auto 1.5rem"><span class="rule-diamond">◆</span></div>
+  <h2>Start mapping your attack surface</h2>
+  <p>Open-source · Local-first · Free · AGPL-3.0</p>
+  <div class="cta-actions">
+    <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">Download v1.0.0</a>
+    <a href="https://github.com/0x5t4l1n/Attackgraph" class="btn btn-ghost" target="_blank" rel="noopener">View on GitHub</a>
   </div>
 </div>
 </main>
 
 <!-- ── Footer ── -->
-<footer role="contentinfo">
+<footer>
+  <div class="footer-rule">
+    <div class="rule-double"></div>
+  </div>
   <div class="footer-grid">
     <div class="footer-brand">
-      <p style="font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; color:var(--text-dim); margin-bottom:.75rem">AttackGraph</p>
+      <h3>AttackGraph</h3>
       <p>Graph-first application security testing platform. Open-source, local-first, and free under AGPL-3.0.</p>
     </div>
     <div class="footer-col">
@@ -445,7 +418,7 @@ cargo tauri dev</pre>
       <a href="https://github.com/0x5t4l1n/Attackgraph" target="_blank" rel="noopener">GitHub Repository</a>
       <a href="https://github.com/0x5t4l1n/Attackgraph/releases" target="_blank" rel="noopener">Releases</a>
       <a href="https://aur.archlinux.org/packages/attackgraph-bin" target="_blank" rel="noopener">AUR Package</a>
-      <a href="https://github.com/0x5t4l1n/Attackgraph/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="https://github.com/0x5t4l1n/Attackgraph/issues" target="_blank" rel="noopener">Issue Tracker</a>
     </div>
     <div class="footer-col">
       <h4>Docs</h4>
@@ -461,7 +434,7 @@ cargo tauri dev</pre>
   </div>
   <div class="footer-bottom">
     <p>© 2026 AttackGraph contributors — AGPL-3.0</p>
-    <p>Only use on authorized targets</p>
+    <p>Authorized targets only</p>
   </div>
 </footer>
 
