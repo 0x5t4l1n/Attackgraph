@@ -94,3 +94,34 @@ if ('IntersectionObserver' in window) {
   }, { rootMargin: '-30% 0px -60% 0px' });
   document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
 }
+
+// ── FAQ accordion ──────────────────────────────────────────
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item   = btn.closest('.faq-item');
+    const answer = item.querySelector('.faq-a');
+    const open   = btn.getAttribute('aria-expanded') === 'true';
+
+    // Close all others
+    document.querySelectorAll('.faq-q').forEach(b => {
+      b.setAttribute('aria-expanded', 'false');
+      b.closest('.faq-item').querySelector('.faq-a').classList.remove('open');
+    });
+
+    // Toggle this one
+    if (!open) {
+      btn.setAttribute('aria-expanded', 'true');
+      answer.classList.add('open');
+      // Smooth scroll so question stays visible
+      setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    }
+  });
+
+  // Keyboard: Space/Enter open; Escape closes
+  btn.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      btn.setAttribute('aria-expanded', 'false');
+      btn.closest('.faq-item').querySelector('.faq-a').classList.remove('open');
+    }
+  });
+});

@@ -28,6 +28,7 @@
       <a href="#workflow">Workflow</a>
       <a href="#install">Install</a>
       <a href="#roadmap">Roadmap</a>
+      <a href="#faq">FAQ</a>
       <a href="https://github.com/0x5t4l1n/Attackgraph" target="_blank" rel="noopener">GitHub</a>
       <button class="theme-btn" id="theme-toggle" aria-label="Switch theme">
         <span id="theme-label">Dark Mode</span>
@@ -50,6 +51,7 @@
   <a href="#workflow">Workflow</a>
   <a href="#install">Install</a>
   <a href="#roadmap">Roadmap</a>
+  <a href="#faq">FAQ</a>
   <a href="https://github.com/0x5t4l1n/Attackgraph" target="_blank" rel="noopener">GitHub</a>
   <a href="https://github.com/0x5t4l1n/Attackgraph/releases/latest" target="_blank" rel="noopener">Download v1.0.0</a>
 </div>
@@ -386,6 +388,150 @@ cargo tauri dev</pre>
         <h3>Scope enforcement</h3>
         <p>The crawler enforces your configured scope at every request. Robots.txt is respected by default.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section id="faq" class="bg-alt">
+  <div class="wrap">
+    <div class="section-header fade-in">
+      <span class="section-label">Questions &amp; Answers</span>
+      <div class="rule"><span class="rule-diamond">◆</span></div>
+      <h2>Common questions</h2>
+      <p>Everything you need to know before getting started.</p>
+    </div>
+
+    <div class="faq-list fade-in">
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>What is AttackGraph?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>AttackGraph is an open-source, local-first application security testing platform for Linux. It helps security researchers and penetration testers discover web application endpoints, model them as a directed graph, apply deterministic security analysis, and generate professional security reports — all without sending data to the cloud.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>Who is AttackGraph for?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>AttackGraph is designed for:</p>
+          <ul>
+            <li><strong>Penetration testers</strong> who need a structured workflow from discovery to report</li>
+            <li><strong>Security researchers</strong> building an understanding of a web application's attack surface</li>
+            <li><strong>Bug bounty hunters</strong> who want organized findings, attack paths, and reproducible steps</li>
+            <li><strong>Security engineers</strong> assessing their own applications for weaknesses before a formal engagement</li>
+          </ul>
+          <p>It requires Linux and assumes some familiarity with web application security concepts.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>Is it free? Is it open source?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes — AttackGraph is free and open source, licensed under the <strong>GNU Affero General Public License v3.0 (AGPL-3.0)</strong>. You can use it, study it, modify it, and distribute it freely. If you run a modified version as a network service, you must make the modified source code available to users of that service.</p>
+          <p>There are no paid tiers, subscriptions, or feature gates.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>Does it require an internet connection or cloud account?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>No. AttackGraph is <strong>local-first by design</strong>. All project data, crawl results, findings, graphs, and reports are stored on your machine at <code>~/.local/share/attackgraph/</code>. There is no telemetry, no cloud sync, and no external communication — except optional AI API calls if you choose to configure an AI provider.</p>
+          <p>Even the AI assistant can run fully locally using <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> with no API key required.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>Does AttackGraph automatically exploit vulnerabilities?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>No. AttackGraph is a <strong>passive analysis and hypothesis generation</strong> platform, not an exploitation framework. It observes, models, and reasons about your application — it does not send attack payloads, attempt authentication bypasses, or execute any destructive actions.</p>
+          <p>All findings are clearly labelled as <em>unvalidated hypotheses</em> until you manually confirm them through your own authorized testing. AttackGraph never claims a vulnerability is confirmed from passive analysis alone.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>What operating systems does it support?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>AttackGraph currently supports <strong>Linux x86_64</strong>. It is available as:</p>
+          <ul>
+            <li><strong>AUR package</strong> (<code>attackgraph-bin</code>) for Arch Linux and Arch-based distributions</li>
+            <li><strong>AppImage</strong> for any Linux x86_64 system — no installation required</li>
+            <li><strong>.deb package</strong> for Debian, Ubuntu, and compatible distributions</li>
+            <li><strong>Build from source</strong> on any Linux system with Python 3.11+, Node.js 18+, and Rust 1.75+</li>
+          </ul>
+          <p>Windows and macOS are not currently supported.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>How is AttackGraph different from Burp Suite or OWASP ZAP?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Burp Suite and OWASP ZAP are <strong>HTTP proxies</strong> — they intercept, inspect, and replay traffic. AttackGraph is a <strong>graph analysis and reporting layer</strong> that sits above traffic collection.</p>
+          <p>In fact, AttackGraph can <em>import</em> your Burp Suite HTTP history to build its application graph. The two tools complement each other: use Burp to capture traffic, import it into AttackGraph to model the attack surface, generate test plans, and produce a structured report.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>Do I need an AI API key to use it?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>No. The AI assistant is <strong>entirely optional</strong>. Every core feature — crawling, traffic import, graph construction, security analysis, attack paths, test plans, and reports — works without any AI configuration.</p>
+          <p>If you want AI assistance, you can connect any OpenAI-compatible provider:</p>
+          <ul>
+            <li><strong>Ollama</strong> — runs locally, no API key, completely private</li>
+            <li><strong>OpenAI</strong> — GPT-4o, GPT-4o-mini, o1</li>
+            <li><strong>Google Gemini</strong> — Gemini 2.0 Flash, 1.5 Pro</li>
+            <li><strong>OpenRouter</strong> — Claude, Llama, Mistral, and 200+ models</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>Is it safe to use on my own applications?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Yes, with reasonable configuration. The crawler is designed to be polite: it respects <code>robots.txt</code> by default, enforces your configured scope, and includes a rate limiter so you control the request rate.</p>
+          <p>That said, even passive crawling can trigger WAF alerts, consume server resources, or expose activity in logs. Always inform your team and have permission before running AttackGraph against any application — even one you own.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          <span>How do I report a bug or contribute?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Bug reports and contributions are welcome on <a href="https://github.com/0x5t4l1n/Attackgraph/issues" target="_blank" rel="noopener">GitHub Issues</a>.</p>
+          <p>Before contributing, read the <a href="https://github.com/0x5t4l1n/Attackgraph/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing Guidelines</a> — which include our AI contribution disclosure policy. Every pull request must declare whether AI was used and which provider and model was involved.</p>
+          <p>For security vulnerabilities, please follow the <a href="https://github.com/0x5t4l1n/Attackgraph/blob/main/SECURITY.md" target="_blank" rel="noopener">Security Policy</a> for responsible disclosure rather than opening a public issue.</p>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
