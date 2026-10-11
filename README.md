@@ -14,6 +14,7 @@ A graph-first application security testing platform — crawl targets, import tr
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.143-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24c8db?logo=tauri&logoColor=white)](https://tauri.app)
+[![AUR](https://img.shields.io/badge/AUR-attackgraph--bin-1793d1?logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/attackgraph-bin)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-88%20passing-brightgreen)](#testing)
 
@@ -344,7 +345,45 @@ The application provides:
 
 ## Installation
 
-### Prerequisites
+### Arch Linux — AUR (Recommended)
+
+No Python, Rust, or Node.js required — the package includes a bundled backend.
+
+```bash
+# Using yay
+yay -S attackgraph-bin
+
+# Using paru
+paru -S attackgraph-bin
+
+# Manual
+git clone https://aur.archlinux.org/attackgraph-bin.git
+cd attackgraph-bin && makepkg -si
+```
+
+Launch from your app menu or run `attackgraph` in a terminal.
+
+> **AUR package:** [aur.archlinux.org/packages/attackgraph-bin](https://aur.archlinux.org/packages/attackgraph-bin)
+
+---
+
+### GitHub Release — AppImage / .deb
+
+Download the latest release from the [Releases page](https://github.com/0x5t4l1n/Attackgraph/releases/latest):
+
+```bash
+# AppImage — portable, no install needed (any Linux x86_64)
+chmod +x AttackGraph_1.0.0_amd64.AppImage
+./AttackGraph_1.0.0_amd64.AppImage
+
+# .deb — Debian / Ubuntu
+sudo dpkg -i AttackGraph_1.0.0_amd64.deb
+attackgraph
+```
+
+---
+
+### Build from Source — Prerequisites
 
 | Requirement | Version | Check |
 |-------------|---------|-------|
@@ -629,7 +668,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-Built by [0x5t4l1n](https://github.com/0x5t4l1n) with AI assistance (Anthropic Claude Opus 4.6 via Claude Code)
+Built by [0x5t4l1n](https://github.com/0x5t4l1n) 
 
 **AttackGraph** — Map · Analyze · Find
 
