@@ -1,204 +1,232 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
-  Background,
-  Controls,
   MiniMap,
+  Controls,
+  Background,
   type Node,
   type Edge,
+  type NodeTypes,
+  Handle,
+  Position,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { api, type GraphData, type GraphNode as GN } from '../services/api';
+import { GitGraph, RefreshCw } from 'lucide-react';
+import { api, type GraphNode, type GraphData } from '../services/api';
+import { PageHeader, StatCard, EmptyState, LoadingState, ErrorState, MethodBadge, useToast, useAsync } from '../components/ui';
 
 const NODE_COLORS: Record<string, string> = {
-  endpoint: '#58a6ff',
-  host: '#3fb950',
-  parameter: '#d29922',
-  auth_mechanism: '#f85149',
-  role: '#d2a8ff',
-  workflow: '#79c0ff',
-  sensitive_op: '#ff7b72',
-  data_resource: '#a5d6ff',
-  page: '#7ee787',
-  operation: '#ffa657',
+  page: 'var(--accent)',
+  endpoint: 'var(--success)',
+  form: 'var(--warning)',
+  parameter: 'var(--text-muted)',
+  redirect: 'var(--info)',
+  resource: 'var(--text-secondary)',
 };
 
-function layoutNodes(nodes: GN[]): Node[] {
-  const byType: Record<string, GN[]> = {};
-  for (const n of nodes) {
-    const t = n.type || 'other';
-    if (!byType[t]) byType[t] = [];
-    byType[t].push(n);
+function CustomNode({ data }: { data: { label: string; method?: string; type: string; observed: boolean; confidence: number } }) {
+  const color = NODE_COLORS[data.type] || 'var(--text-muted)';
+  return (
+    <div style={{
+      background: 'var(--bg-raised)',
+      border: `1.5px ${data.observed ? 'solid' : 'dashed'} ${color}`,
+      borderRadius: 'var(--radius)',
+      padding: '6px 10px',
+      minWidth: 120,
+      fontSize: 11,
+      color: 'var(--text-primary)',
+    }}>
+      <Handle type="target" position={Position.Top} style={{ background: color, width: 6, height: 6 }} />
+      {data.method && <span style={{ marginRight: 6, fontSize: 10, color, fontWeight: 700 }}>{data.method}</span>}
+      <span style={{ fontFamily: 'var(--font-mono)', wordBreak: 'break-all' }}>{data.label}</span>
+      <div style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>{data.type} · {Math.round(data.confidence * 100)}%</div>
+      <Handle type="source" position={Position.Bottom} style={{ background: color, width: 6, height: 6 }} />
+    </div>
+  );
+}
+
+const nodeTypes: NodeTypes = { custom: CustomNode };
+
+const TYPE_ORDER = ['page', 'endpoint', 'form', 'parameter', 'redirect', 'resource'];
+
+function buildLayout(rawNodes: GraphNode[]): Node[] {
+  const grouped: Record<string, GraphNode[]> = {};
+  for (const n of rawNodes) {
+    (grouped[n.type] ??= []).push(n);
   }
-
   const result: Node[] = [];
-  let colX = 0;
-
-  for (const [type, group] of Object.entries(byType)) {
-    for (let i = 0; i < group.length; i++) {
-      const n = group[i];
+  let colIdx = 0;
+  for (const type of [...TYPE_ORDER, ...Object.keys(grouped).filter(t => !TYPE_ORDER.includes(t))]) {
+    const group = grouped[type];
+    if (!group) continue;
+    group.forEach((n, rowIdx) => {
       result.push({
         id: n.id,
-        position: { x: colX, y: i * 80 },
-        data: {
-          label: n.label.length > 40 ? n.label.slice(0, 37) + '...' : n.label,
-        },
-        style: {
-          background: NODE_COLORS[type] || '#8b949e',
-          color: '#0d1117',
-          border: n.observed ? '2px solid #e6edf3' : '2px dashed #6e7681',
-          borderRadius: 6,
-          padding: '6px 10px',
-          fontSize: 11,
-          fontWeight: 600,
-          maxWidth: 200,
-        },
+        type: 'custom',
+        position: { x: colIdx * 220, y: rowIdx * 90 },
+        data: { label: n.label, method: n.method, type: n.type, observed: n.observed, confidence: n.confidence },
       });
-    }
-    colX += 280;
+    });
+    colIdx++;
   }
   return result;
 }
 
+function buildEdges(graph: GraphData): Edge[] {
+  return graph.edges.map(e => ({
+    id: e.id,
+    source: e.source,
+    target: e.target,
+    label: e.label,
+    style: { stroke: e.observed ? 'var(--border-strong)' : 'var(--border)', strokeDasharray: e.observed ? undefined : '4 2' },
+    labelStyle: { fill: 'var(--text-muted)', fontSize: 10 },
+  }));
+}
+
 export default function GraphPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const [graphData, setGraphData] = useState<GraphData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [building, setBuilding] = useState(false);
-  const [error, setError] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [selectedNode, setSelectedNode] = useState<GN | null>(null);
+  const [typeFilter, setTypeFilter] = useState('all');
 
-  const loadGraph = useCallback(() => {
-    if (!projectId) return;
-    setLoading(true);
-    api
-      .getGraph(projectId)
-      .then(setGraphData)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [projectId]);
+  const { data: graph, loading, error, reload } = useAsync(
+    () => api.getGraph(projectId!),
+    [projectId],
+  );
 
-  useEffect(loadGraph, [loadGraph]);
-
-  const handleBuild = () => {
-    if (!projectId) return;
+  const handleBuild = useCallback(async () => {
     setBuilding(true);
-    api
-      .buildGraph(projectId)
-      .then(() => loadGraph())
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setBuilding(false));
-  };
+    try {
+      const r = await api.buildGraph(projectId!);
+      toast('success', `Graph built: ${r.nodes} nodes, ${r.edges} edges`);
+      reload();
+    } catch (e: unknown) {
+      toast('error', e instanceof Error ? e.message : 'Build failed');
+    } finally {
+      setBuilding(false);
+    }
+  }, [projectId, toast, reload]);
 
-  if (loading) return <div className="loading">Loading graph...</div>;
-  if (error) return <div className="card" style={{ borderColor: 'var(--danger)' }}>{error}</div>;
+  const onNodeClick = useCallback((_: unknown, node: Node) => {
+    if (!graph) return;
+    const raw = graph.nodes.find(n => n.id === node.id) ?? null;
+    setSelectedNode(raw);
+  }, [graph]);
 
-  const allNodes = graphData?.nodes || [];
-  const filteredNodes = filterType ? allNodes.filter((n) => n.type === filterType) : allNodes;
-  const filteredIds = new Set(filteredNodes.map((n) => n.id));
-  const rfNodes = layoutNodes(filteredNodes);
-  const rfEdges: Edge[] = (graphData?.edges || [])
-    .filter((e) => filteredIds.has(e.source) && filteredIds.has(e.target))
-    .map((e) => ({
-      id: e.id,
-      source: e.source,
-      target: e.target,
-      label: e.label || undefined,
-      style: {
-        stroke: e.observed ? '#58a6ff' : '#6e7681',
-        strokeDasharray: e.observed ? undefined : '5 5',
-      },
-      animated: e.type === 'attack_path',
-    }));
+  if (loading) return <LoadingState message="Loading graph..." />;
+  if (error) return <ErrorState message={error} onRetry={reload} />;
 
-  const nodeTypes = [...new Set(allNodes.map((n) => n.type))].sort();
-  const stats = graphData?.statistics || {};
+  const stats = graph?.statistics ?? {};
+  const filteredNodes = (graph?.nodes ?? []).filter(n => typeFilter === 'all' || n.type === typeFilter);
+  const nodeTypes2 = [...new Set((graph?.nodes ?? []).map(n => n.type))];
 
-  const handleNodeClick = (_: unknown, node: Node) => {
-    const gn = allNodes.find((n) => n.id === node.id);
-    if (gn) setSelectedNode(gn);
-  };
+  const flowNodes = buildLayout(filteredNodes);
+  const flowEdges = buildEdges({ ...graph!, nodes: filteredNodes });
 
   return (
-    <div>
-      <div className="page-header">
-        <h1>Application Graph</h1>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <select value={filterType} onChange={(e) => setFilterType(e.target.value)} style={{ width: 'auto' }}>
-            <option value="">All Types</option>
-            {nodeTypes.map((t) => (
-              <option key={t} value={t}>{t} ({allNodes.filter((n) => n.type === t).length})</option>
-            ))}
-          </select>
-          <button onClick={handleBuild} disabled={building} type="button">
-            {building ? 'Building...' : 'Rebuild Graph'}
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-4" style={{ marginBottom: '1rem' }}>
-        <div className="card" style={{ textAlign: 'center', padding: '0.75rem' }}>
-          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.total_nodes as number ?? 0}</div>
-          <div className="stat-label">Nodes</div>
-        </div>
-        <div className="card" style={{ textAlign: 'center', padding: '0.75rem' }}>
-          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.total_edges as number ?? 0}</div>
-          <div className="stat-label">Edges</div>
-        </div>
-        <div className="card" style={{ textAlign: 'center', padding: '0.75rem' }}>
-          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.observed_nodes as number ?? 0}</div>
-          <div className="stat-label">Observed</div>
-        </div>
-        <div className="card" style={{ textAlign: 'center', padding: '0.75rem' }}>
-          <div className="stat-value" style={{ fontSize: '1.5rem' }}>{stats.inferred_nodes as number ?? 0}</div>
-          <div className="stat-label">Inferred</div>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <div style={{ height: 500, flex: 1, border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          {rfNodes.length === 0 ? (
-            <div className="empty-state">No graph data. Crawl or import data, then build the graph.</div>
-          ) : (
-            <ReactFlow
-              nodes={rfNodes}
-              edges={rfEdges}
-              onNodeClick={handleNodeClick}
-              fitView
-              colorMode="dark"
-            >
-              <Background color="#30363d" gap={20} />
-              <Controls />
-              <MiniMap
-                nodeColor={(n) => (n.style?.background as string) || '#8b949e'}
-                maskColor="rgba(13,17,23,0.7)"
-              />
-            </ReactFlow>
-          )}
-        </div>
-
-        {selectedNode && (
-          <div className="card" style={{ width: 320, flexShrink: 0, maxHeight: 500, overflowY: 'auto' }}>
-            <h2 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Node Details</h2>
-            <div style={{ fontSize: '0.85rem' }}>
-              <div style={{ marginBottom: '0.3rem' }}><strong>Label:</strong> {selectedNode.label}</div>
-              <div style={{ marginBottom: '0.3rem' }}><strong>Type:</strong> <span className="badge badge-info">{selectedNode.type}</span></div>
-              {selectedNode.url && <div style={{ marginBottom: '0.3rem', fontFamily: 'monospace', wordBreak: 'break-all', fontSize: '0.8rem' }}>{selectedNode.url}</div>}
-              <div style={{ marginBottom: '0.3rem' }}><strong>Source:</strong> {selectedNode.evidence_source}</div>
-              <div style={{ marginBottom: '0.3rem' }}><strong>Confidence:</strong> {(selectedNode.confidence * 100).toFixed(0)}%</div>
-              <div style={{ marginBottom: '0.3rem' }}><strong>Observed:</strong> {selectedNode.observed ? 'Yes' : 'No (inferred)'}</div>
-              {Object.keys(selectedNode.properties).length > 0 && (
-                <pre style={{ background: 'var(--bg-primary)', padding: '0.5rem', borderRadius: 4, fontSize: '0.75rem', overflow: 'auto', marginTop: '0.5rem' }}>
-                  {JSON.stringify(selectedNode.properties, null, 2)}
-                </pre>
-              )}
-            </div>
-            <button onClick={() => setSelectedNode(null)} style={{ marginTop: '0.75rem', width: '100%' }} type="button">Close</button>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Application Graph"
+        icon={<GitGraph size={20} />}
+        actions={
+          <div className="flex gap-2 items-center">
+            <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+              <option value="all">All Types</option>
+              {nodeTypes2.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <button className="btn-primary flex gap-1 items-center" onClick={handleBuild} disabled={building}>
+              <RefreshCw size={14} className={building ? 'spinner' : ''} />
+              {building ? 'Building…' : 'Rebuild Graph'}
+            </button>
           </div>
-        )}
+        }
+      />
+
+      <div className="grid grid-4 gap-3">
+        <StatCard value={filteredNodes.length} label="Nodes" />
+        <StatCard value={(graph?.edges ?? []).length} label="Edges" />
+        <StatCard value={filteredNodes.filter(n => n.observed).length} label="Observed" />
+        <StatCard value={filteredNodes.filter(n => !n.observed).length} label="Inferred" />
       </div>
+
+      {filteredNodes.length === 0 ? (
+        <EmptyState
+          icon={<GitGraph size={32} />}
+          title="No graph data"
+          description="Run a crawl then click Rebuild Graph to generate the application graph."
+          action={<button className="btn-primary" onClick={handleBuild}>Build Graph</button>}
+        />
+      ) : (
+        <div style={{ height: 'calc(100vh - 320px)', minHeight: 400, background: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+          <ReactFlow
+            nodes={flowNodes}
+            edges={flowEdges}
+            nodeTypes={nodeTypes}
+            onNodeClick={onNodeClick}
+            fitView
+            style={{ background: 'var(--bg-surface)' }}
+          >
+            <MiniMap style={{ background: 'var(--bg-raised)' }} nodeColor={(n) => NODE_COLORS[(n.data as { type: string }).type] || 'var(--border)'} />
+            <Controls style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }} />
+            <Background color="var(--border)" gap={20} />
+          </ReactFlow>
+        </div>
+      )}
+
+      {selectedNode && (
+        <div className="detail-panel">
+          <div className="detail-panel-header">
+            <span className="text-sm text-muted">Selected Node</span>
+            <button className="btn-ghost btn-icon btn-sm" onClick={() => setSelectedNode(null)}>✕</button>
+          </div>
+          <div className="detail-section">
+            <div className="detail-label">Label</div>
+            <div className="detail-value mono">{selectedNode.label}</div>
+          </div>
+          <div className="detail-section">
+            <div className="detail-label">Type</div>
+            <div className="detail-value">{selectedNode.type}</div>
+          </div>
+          {selectedNode.method && (
+            <div className="detail-section">
+              <div className="detail-label">Method</div>
+              <div className="detail-value"><MethodBadge method={selectedNode.method} /></div>
+            </div>
+          )}
+          {selectedNode.url && (
+            <div className="detail-section">
+              <div className="detail-label">URL</div>
+              <div className="detail-value mono text-xs">{selectedNode.url}</div>
+            </div>
+          )}
+          <div className="detail-section">
+            <div className="detail-label">Evidence</div>
+            <div className="detail-value">{selectedNode.evidence_source} · {Math.round(selectedNode.confidence * 100)}% confidence</div>
+          </div>
+          <div className="detail-section">
+            <div className="detail-label">Observed</div>
+            <div className="detail-value">{selectedNode.observed ? 'Yes' : 'No (inferred)'}</div>
+          </div>
+        </div>
+      )}
+
+      {stats && Object.keys(stats).length > 0 && (
+        <div className="card">
+          <div className="card-header"><span className="card-header-title">Statistics</span></div>
+          <div className="card-body">
+            <div className="grid grid-4 gap-2">
+              {Object.entries(stats).map(([k, v]) => (
+                <div key={k} className="detail-section">
+                  <div className="detail-label">{k.replace(/_/g, ' ')}</div>
+                  <div className="detail-value">{String(v)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -164,7 +164,10 @@ export interface TestPlan {
   created_at: string;
 }
 
-const BASE = '/api';
+// In Tauri desktop, use absolute URL (no dev-server proxy available).
+// window.__TAURI_INTERNALS__ is injected by Tauri at runtime.
+const isTauriEnv = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const BASE = isTauriEnv ? 'http://127.0.0.1:8000/api' : '/api';
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -276,6 +279,14 @@ export const api = {
   aiStatus: () => request<{ enabled: boolean; model: string | null }>('/ai/status'),
   aiSummarize: (projectId: string) =>
     request<{ summary: string }>(`/projects/${projectId}/ai/summarize`, { method: 'POST' }),
+
+  getAIConfig: () =>
+    request<{ enabled: boolean; api_base: string; api_key_set: boolean; model: string; max_tokens: number; temperature: number }>('/ai/config'),
+  updateAIConfig: (data: { enabled?: boolean; api_base?: string; api_key?: string; model?: string; max_tokens?: number; temperature?: number }) =>
+    request<{ enabled: boolean; api_base: string; api_key_set: boolean; model: string }>('/ai/config', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 
   getSettings: () => request<Record<string, unknown>>('/settings'),
 };

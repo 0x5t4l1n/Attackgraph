@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { Outlet, NavLink, useParams } from 'react-router-dom';
+import logoUrl from '../../assets/logo.png';
 import {
-  Shield, Globe, Upload, Network, AlertTriangle,
-  Route, ClipboardList, FileText, Home, Bot,
+  Shield, Home, Globe, Upload, GitGraph,
+  AlertTriangle, Route, ClipboardList, FileText, Bot,
+  Settings, PanelLeftClose, PanelLeftOpen, Crosshair,
+  Sun, Moon, Monitor,
 } from 'lucide-react';
+// Shield is used in project nav for Overview link
+import { useTheme } from '../../contexts/ThemeContext';
+
+type ThemeMode = 'dark' | 'light' | 'system';
 
 interface NavItem {
   to: string;
@@ -11,20 +19,28 @@ interface NavItem {
   end?: boolean;
 }
 
+const THEME_OPTIONS: { value: ThemeMode; icon: React.ComponentType<{ size?: number }>; label: string }[] = [
+  { value: 'dark', icon: Moon, label: 'Dark' },
+  { value: 'light', icon: Sun, label: 'Light' },
+  { value: 'system', icon: Monitor, label: 'System' },
+];
+
 export default function Layout() {
   const { projectId } = useParams();
+  const [collapsed, setCollapsed] = useState(false);
+  const { mode, setMode } = useTheme();
 
-  const mainNav: NavItem[] = [
-    { to: '/', icon: Home, label: 'Projects' },
+  const globalNav: NavItem[] = [
+    { to: '/', icon: Home, label: 'Projects', end: true },
   ];
 
   const projectNav: NavItem[] = projectId
     ? [
         { to: `/projects/${projectId}`, icon: Shield, label: 'Overview', end: true },
         { to: `/projects/${projectId}/crawl`, icon: Globe, label: 'Crawler' },
-        { to: `/projects/${projectId}/import`, icon: Upload, label: 'Import' },
-        { to: `/projects/${projectId}/endpoints`, icon: Network, label: 'Endpoints' },
-        { to: `/projects/${projectId}/graph`, icon: Network, label: 'Graph' },
+        { to: `/projects/${projectId}/import`, icon: Upload, label: 'Traffic Import' },
+        { to: `/projects/${projectId}/endpoints`, icon: Crosshair, label: 'Endpoints' },
+        { to: `/projects/${projectId}/graph`, icon: GitGraph, label: 'Application Graph' },
         { to: `/projects/${projectId}/findings`, icon: AlertTriangle, label: 'Findings' },
         { to: `/projects/${projectId}/attack-paths`, icon: Route, label: 'Attack Paths' },
         { to: `/projects/${projectId}/test-plans`, icon: ClipboardList, label: 'Test Plans' },
@@ -33,90 +49,107 @@ export default function Layout() {
       ]
     : [];
 
-  const linkStyle = (isActive: boolean): React.CSSProperties => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.5rem 1rem',
-    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-    background: isActive ? 'rgba(88,166,255,0.1)' : 'transparent',
-    fontSize: '0.85rem',
-    borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
-  });
-
   return (
     <>
-      <nav
-        style={{
-          width: 220,
-          background: 'var(--bg-secondary)',
-          borderRight: '1px solid var(--border)',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '1rem 0',
-          flexShrink: 0,
-          height: '100vh',
-          position: 'sticky',
-          top: 0,
-          overflowY: 'auto',
-        }}
-      >
-        <div
-          style={{
-            padding: '0 1rem 1rem',
-            borderBottom: '1px solid var(--border)',
-            marginBottom: '0.5rem',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Shield size={20} color="var(--accent)" />
-            <span style={{ fontWeight: 700, fontSize: '1rem' }}>AttackGraph</span>
+      <nav className={`sidebar${collapsed ? ' collapsed' : ''}`}>
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-info">
+            <img src={logoUrl} alt="AttackGraph" style={{ width: 28, height: 28, borderRadius: 4, flexShrink: 0 }} />
+            <div className="sidebar-brand-text">
+              <span className="sidebar-brand-name">AttackGraph</span>
+              <span className="sidebar-brand-version">v0.1.0</span>
+            </div>
           </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-            v0.1.0
-          </div>
+          <button
+            className="btn-ghost btn-icon btn-sm"
+            onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
         </div>
 
-        {mainNav.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end
-            style={({ isActive }) => linkStyle(isActive)}
-          >
-            <item.icon size={16} /> {item.label}
-          </NavLink>
-        ))}
+        <div className="sidebar-section">
+          {globalNav.map(item => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+              title={collapsed ? item.label : undefined}
+            >
+              <item.icon size={16} />
+              <span className="sidebar-link-label">{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
 
         {projectNav.length > 0 && (
-          <>
-            <div
-              style={{
-                padding: '0.75rem 1rem 0.25rem',
-                fontSize: '0.7rem',
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Project
-            </div>
-            {projectNav.map((item) => (
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Project</div>
+            {projectNav.map(item => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
-                style={({ isActive }) => linkStyle(isActive)}
+                className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+                title={collapsed ? item.label : undefined}
               >
-                <item.icon size={16} /> {item.label}
+                <item.icon size={16} />
+                <span className="sidebar-link-label">{item.label}</span>
               </NavLink>
             ))}
-          </>
+          </div>
         )}
+
+        <div className="sidebar-footer">
+          {!collapsed && (
+            <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+              {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  className={`btn-ghost btn-sm flex-1${mode === value ? ' active' : ''}`}
+                  style={{
+                    color: mode === value ? 'var(--accent)' : 'var(--text-muted)',
+                    background: mode === value ? 'var(--bg-active)' : 'transparent',
+                    border: 'none',
+                    padding: '5px 4px',
+                    gap: 3,
+                    fontSize: 11,
+                  }}
+                  onClick={() => setMode(value)}
+                  title={label}
+                >
+                  <Icon size={13} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+          {collapsed && THEME_OPTIONS.map(({ value, icon: Icon, label }) => mode === value ? (
+            <button
+              key={value}
+              className="btn-ghost btn-icon btn-sm w-full"
+              style={{ color: 'var(--text-muted)' }}
+              onClick={() => setMode(THEME_OPTIONS[(THEME_OPTIONS.findIndex(t => t.value === value) + 1) % 3].value)}
+              title={`Theme: ${label}`}
+            >
+              <Icon size={14} />
+            </button>
+          ) : null)}
+          <NavLink to="/settings" className="sidebar-link" title={collapsed ? 'Settings' : undefined}>
+            <Settings size={16} />
+            <span className="sidebar-link-label">Settings</span>
+          </NavLink>
+        </div>
       </nav>
-      <main style={{ flex: 1, padding: '1.5rem 2rem', overflow: 'auto', maxHeight: '100vh' }}>
-        <Outlet />
-      </main>
+
+      <div className="main-content">
+        <div className="page">
+          <Outlet />
+        </div>
+      </div>
     </>
   );
 }

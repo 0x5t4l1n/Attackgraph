@@ -33,3 +33,25 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Secrets / AI config (contains API keys)
+attackgraph_ai_config.json
+
+# Playwright test artifacts
+.playwright-mcp/
+screen-*.png
+
+# PyInstaller
+*.spec
+*.pyc
+dist/
+
+# Tauri build outputs (too large for git)
+frontend/src-tauri/target/
+frontend/src-tauri/binaries/
+
+# Large generated screenshots
+screenshots/
+
+# Bundled backend binary (regenerate with pyinstaller)
+backend_server.py.bak

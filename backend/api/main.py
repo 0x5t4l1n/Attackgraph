@@ -121,6 +121,7 @@ class FindingResponse(BaseModel):
     title: str
     description: str
     affected_endpoints: list
+    evidence_refs: list = []
     severity: str
     confidence: float
     validation_status: str
@@ -130,6 +131,7 @@ class FindingResponse(BaseModel):
     reproduction_steps: str
     remediation: str
     created_at: datetime
+    updated_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -163,6 +165,7 @@ class TestPlanResponse(BaseModel):
     test_procedure: str
     expected_secure_behavior: str
     potential_insecure_outcomes: list
+    evidence_to_capture: list
     cleanup_steps: list
     limitations: list
     status: str
@@ -465,6 +468,8 @@ def _build_graph_from_db(project_id: str, endpoints: list[Endpoint], observation
             "url": ep.url,
             "method": ep.method,
             "properties": {
+                "url": ep.url,
+                "method": ep.method,
                 "status_code": ep.status_code,
                 "content_type": ep.content_type,
                 "discovery_source": ep.discovery_source,
@@ -806,6 +811,8 @@ async def get_graph(project_id: str, db: AsyncSession = Depends(get_db)):
                 "id": n.id,
                 "type": n.node_type,
                 "label": n.label,
+                "url": (n.properties or {}).get("url"),
+                "method": (n.properties or {}).get("method"),
                 "properties": n.properties,
                 "evidence_source": n.evidence_source,
                 "confidence": n.confidence,
@@ -1319,6 +1326,51 @@ async def ai_status():
     }
 
 
+@app.get("/api/ai/config")
+async def get_ai_config():
+    return {
+        "enabled": settings.ai.enabled,
+        "api_base": settings.ai.api_base,
+        "api_key_set": bool(settings.ai.api_key),
+        "model": settings.ai.model,
+        "max_tokens": settings.ai.max_tokens,
+        "temperature": settings.ai.temperature,
+    }
+
+
+class AIConfigUpdate(BaseModel):
+    enabled: bool | None = None
+    api_base: str | None = None
+    api_key: str | None = None
+    model: str | None = None
+    max_tokens: int | None = None
+    temperature: float | None = None
+
+
+@app.patch("/api/ai/config")
+async def update_ai_config(update: AIConfigUpdate):
+    from backend.config import save_ai_config
+    if update.enabled is not None:
+        settings.ai.enabled = update.enabled
+    if update.api_base is not None:
+        settings.ai.api_base = update.api_base
+    if update.api_key is not None:
+        settings.ai.api_key = update.api_key
+    if update.model is not None:
+        settings.ai.model = update.model
+    if update.max_tokens is not None:
+        settings.ai.max_tokens = update.max_tokens
+    if update.temperature is not None:
+        settings.ai.temperature = update.temperature
+    save_ai_config()
+    return {
+        "enabled": settings.ai.enabled,
+        "api_base": settings.ai.api_base,
+        "api_key_set": bool(settings.ai.api_key),
+        "model": settings.ai.model,
+    }
+
+
 @app.post("/api/projects/{project_id}/ai/summarize")
 async def ai_summarize(project_id: str, db: AsyncSession = Depends(get_db)):
     await _get_project(project_id, db)
@@ -1328,6 +1380,19 @@ async def ai_summarize(project_id: str, db: AsyncSession = Depends(get_db)):
     obs_result = await db.execute(select(Observation).where(Observation.project_id == project_id))
     observations = obs_result.scalars().all()
     graph_dict = _build_graph_from_db(project_id, endpoints, observations)
+
+    # Enrich with findings for better context
+    f_result = await db.execute(select(Finding).where(Finding.project_id == project_id))
+    findings = f_result.scalars().all()
+    graph_dict["findings"] = [
+        {
+            "title": f.title,
+            "severity": f.severity,
+            "validation_status": f.validation_status,
+            "affected_endpoints": f.affected_endpoints,
+        }
+        for f in findings
+    ]
 
     from backend.ai_assistant.assistant import AIAssistant
 

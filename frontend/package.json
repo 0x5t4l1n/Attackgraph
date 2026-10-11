@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.12.3",
+    "@tauri-apps/plugin-dialog": "^2.8.2",
+    "@xyflow/react": "^12.6.0",
+    "lucide-react": "^0.515.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.6.0",
-    "@xyflow/react": "^12.6.0",
-    "lucide-react": "^0.515.0"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.6.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

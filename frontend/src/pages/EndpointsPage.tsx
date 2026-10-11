@@ -1,135 +1,313 @@
-import { useEffect, useState } from 'react';
+import { useState, useMemo, useCallback, Fragment } from 'react';
 import { useParams } from 'react-router-dom';
+import { Network, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { api, type Endpoint, type EndpointDetail } from '../services/api';
+import {
+  PageHeader,
+  SearchInput,
+  MethodBadge,
+  RelativeTime,
+  EmptyState,
+  LoadingState,
+  ErrorState,
+  useAsync,
+} from '../components/ui';
+
+type SortKey = 'path' | 'status' | 'first_seen';
+type SortDir = 'asc' | 'desc';
 
 export default function EndpointsPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const {
+    data: endpoints,
+    loading,
+    error,
+    reload,
+  } = useAsync<Endpoint[]>(
+    () => (projectId ? api.listEndpoints(projectId) : Promise.resolve([])),
+    [projectId],
+  );
+
+  const [search, setSearch] = useState('');
   const [methodFilter, setMethodFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey>('path');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [selected, setSelected] = useState<EndpointDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  useEffect(() => {
-    if (!projectId) return;
-    setLoading(true);
-    api
-      .listEndpoints(projectId)
-      .then(setEndpoints)
-      .finally(() => setLoading(false));
-  }, [projectId]);
+  // Derived filter options
+  const methods = useMemo(
+    () => [...new Set((endpoints || []).map((e) => e.method))].sort(),
+    [endpoints],
+  );
+  const sources = useMemo(
+    () => [...new Set((endpoints || []).map((e) => e.discovery_source))].sort(),
+    [endpoints],
+  );
 
-  const handleSelect = (ep: Endpoint) => {
-    if (!projectId) return;
-    api.getEndpoint(projectId, ep.id).then(setSelected).catch(() => {});
-  };
-
-  const filtered = endpoints.filter((ep) => {
-    if (methodFilter && ep.method !== methodFilter) return false;
-    if (sourceFilter && ep.discovery_source !== sourceFilter) return false;
-    return true;
-  });
-
-  const methods = [...new Set(endpoints.map((e) => e.method))].sort();
-  const sources = [...new Set(endpoints.map((e) => e.discovery_source))].sort();
-
-  const methodColor = (m: string) => {
-    switch (m) {
-      case 'GET': return '#3fb950';
-      case 'POST': return '#58a6ff';
-      case 'PUT': return '#d29922';
-      case 'PATCH': return '#d29922';
-      case 'DELETE': return '#f85149';
-      default: return 'var(--text-secondary)';
+  // Filtered and sorted endpoints
+  const filtered = useMemo(() => {
+    let result = endpoints || [];
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter((ep) => ep.normalized_url.toLowerCase().includes(q) || ep.url.toLowerCase().includes(q));
     }
+    if (methodFilter) {
+      result = result.filter((ep) => ep.method === methodFilter);
+    }
+    if (sourceFilter) {
+      result = result.filter((ep) => ep.discovery_source === sourceFilter);
+    }
+    // Sort
+    result = [...result].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'path':
+          cmp = a.normalized_url.localeCompare(b.normalized_url);
+          break;
+        case 'status':
+          cmp = (a.status_code || 0) - (b.status_code || 0);
+          break;
+        case 'first_seen':
+          cmp = new Date(a.first_seen).getTime() - new Date(b.first_seen).getTime();
+          break;
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return result;
+  }, [endpoints, search, methodFilter, sourceFilter, sortKey, sortDir]);
+
+  const toggleSort = useCallback(
+    (key: SortKey) => {
+      if (sortKey === key) {
+        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortKey(key);
+        setSortDir('asc');
+      }
+    },
+    [sortKey],
+  );
+
+  const handleSelect = useCallback(
+    (ep: Endpoint) => {
+      if (!projectId) return;
+      if (selected?.id === ep.id) {
+        setSelected(null);
+        return;
+      }
+      setDetailLoading(true);
+      api
+        .getEndpoint(projectId, ep.id)
+        .then(setSelected)
+        .catch(() => setSelected(null))
+        .finally(() => setDetailLoading(false));
+    },
+    [projectId, selected],
+  );
+
+  const SortIcon = ({ column }: { column: SortKey }) => {
+    if (sortKey !== column) return null;
+    return sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />;
   };
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Endpoints ({filtered.length})</h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <select value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)} style={{ width: 'auto' }}>
-            <option value="">All Methods</option>
-            {methods.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-          <select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)} style={{ width: 'auto' }}>
-            <option value="">All Sources</option>
-            {sources.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
+      <PageHeader
+        title="Endpoints"
+        subtitle={endpoints ? `${filtered.length} of ${endpoints.length} endpoints` : undefined}
+        icon={<Network size={20} />}
+      />
+
+      {/* Toolbar */}
+      <div className="toolbar">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Filter by URL path..."
+        />
+        <div className="toolbar-divider" />
+        <select value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
+          <option value="">All Methods</option>
+          {methods.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
+          <option value="">All Sources</option>
+          {sources.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
       </div>
 
+      {/* Table */}
       {loading ? (
-        <div className="loading">Loading endpoints...</div>
+        <LoadingState message="Loading endpoints..." />
+      ) : error ? (
+        <ErrorState message={error} onRetry={reload} />
       ) : filtered.length === 0 ? (
-        <div className="empty-state">No endpoints found. Run a crawl or import traffic first.</div>
+        <EmptyState
+          icon={<Network size={32} />}
+          title="No endpoints found"
+          description={
+            endpoints && endpoints.length > 0
+              ? 'No endpoints match the current filters. Try adjusting your search or filters.'
+              : 'Run a crawl or import traffic to discover endpoints.'
+          }
+        />
       ) : (
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 1, overflow: 'auto', maxHeight: 'calc(100vh - 150px)' }}>
+        <div className="card">
+          <div className="overflow-auto">
             <table>
               <thead>
                 <tr>
                   <th>Method</th>
-                  <th>URL</th>
-                  <th>Status</th>
+                  <th
+                    className="expand-row"
+                    onClick={() => toggleSort('path')}
+                  >
+                    <span className="flex items-center gap-1">
+                      Path <SortIcon column="path" />
+                    </span>
+                  </th>
+                  <th
+                    className="expand-row"
+                    onClick={() => toggleSort('status')}
+                  >
+                    <span className="flex items-center gap-1">
+                      Status <SortIcon column="status" />
+                    </span>
+                  </th>
+                  <th>Content Type</th>
                   <th>Source</th>
+                  <th
+                    className="expand-row"
+                    onClick={() => toggleSort('first_seen')}
+                  >
+                    <span className="flex items-center gap-1">
+                      First Seen <SortIcon column="first_seen" />
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((ep) => (
-                  <tr
-                    key={ep.id}
-                    onClick={() => handleSelect(ep)}
-                    style={{
-                      cursor: 'pointer',
-                      background: selected?.id === ep.id ? 'var(--bg-tertiary)' : 'transparent',
-                    }}
-                  >
-                    <td><span style={{ color: methodColor(ep.method), fontWeight: 600, fontFamily: 'monospace' }}>{ep.method}</span></td>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ep.url}</td>
-                    <td>{ep.status_code || '-'}</td>
-                    <td><span className="badge badge-info">{ep.discovery_source}</span></td>
-                  </tr>
+                  <Fragment key={ep.id}>
+                    <tr
+                      className="expand-row"
+                      onClick={() => handleSelect(ep)}
+                      style={selected?.id === ep.id ? { background: 'var(--bg-active)' } : undefined}
+                    >
+                      <td><MethodBadge method={ep.method} /></td>
+                      <td className="mono truncate" style={{ maxWidth: 400 }}>{ep.normalized_url}</td>
+                      <td>{ep.status_code || <span className="text-muted">--</span>}</td>
+                      <td className="text-sm text-secondary truncate" style={{ maxWidth: 180 }}>
+                        {ep.content_type || <span className="text-muted">--</span>}
+                      </td>
+                      <td><span className="badge badge-neutral">{ep.discovery_source}</span></td>
+                      <td><RelativeTime date={ep.first_seen} /></td>
+                    </tr>
+
+                    {/* Inline expansion row — directly below selected row */}
+                    {selected?.id === ep.id && (
+                      <tr key={`${ep.id}-detail`}>
+                        <td colSpan={6} style={{ padding: 0, background: 'var(--bg-surface)', borderBottom: `2px solid var(--accent)` }}>
+                          {detailLoading ? (
+                            <div className="p-4">
+                              <LoadingState message="Loading endpoint details..." />
+                            </div>
+                          ) : (
+                            <div className="detail-panel" style={{ margin: 0, borderRadius: 0, border: 'none', borderLeft: `3px solid var(--accent)` }}>
+                              <div className="detail-section">
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <MethodBadge method={ep.method} />
+                                    <span className="mono text-sm">{ep.url}</span>
+                                  </div>
+                                  <button
+                                    className="btn-ghost btn-icon btn-sm"
+                                    onClick={(e) => { e.stopPropagation(); setSelected(null); }}
+                                    type="button"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                                <div className="grid grid-4 gap-4">
+                                  <div>
+                                    <div className="detail-label">Status Code</div>
+                                    <div className="detail-value">{ep.status_code || 'Unknown'}</div>
+                                  </div>
+                                  <div>
+                                    <div className="detail-label">Content Type</div>
+                                    <div className="detail-value">{ep.content_type || 'Unknown'}</div>
+                                  </div>
+                                  <div>
+                                    <div className="detail-label">Source</div>
+                                    <div className="detail-value">
+                                      <span className="badge badge-neutral">{ep.discovery_source}</span>
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="detail-label">First Seen</div>
+                                    <div className="detail-value"><RelativeTime date={ep.first_seen} /></div>
+                                  </div>
+                                </div>
+                                {ep.parent_url && (
+                                  <div style={{ marginTop: 'var(--sp-3)' }}>
+                                    <div className="detail-label">Parent URL</div>
+                                    <div className="detail-value mono">{ep.parent_url}</div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {selected && selected.observations.length > 0 && (
+                                <div className="detail-section">
+                                  <div className="detail-label mb-2">
+                                    Observations ({selected.observations.length})
+                                  </div>
+                                  <table>
+                                    <thead>
+                                      <tr>
+                                        <th>Method</th>
+                                        <th>URL</th>
+                                        <th>Status</th>
+                                        <th>Content Type</th>
+                                        <th>Timestamp</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {selected.observations.map((obs) => (
+                                        <tr key={obs.id}>
+                                          <td><MethodBadge method={obs.request_method} /></td>
+                                          <td className="mono truncate" style={{ maxWidth: 300 }}>{obs.request_url}</td>
+                                          <td>{obs.response_status || <span className="text-muted">--</span>}</td>
+                                          <td className="text-secondary truncate" style={{ maxWidth: 150 }}>
+                                            {obs.content_type || <span className="text-muted">--</span>}
+                                          </td>
+                                          <td><RelativeTime date={obs.timestamp} /></td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
           </div>
-
-          {selected && (
-            <div className="card" style={{ width: 400, flexShrink: 0, maxHeight: 'calc(100vh - 150px)', overflowY: 'auto' }}>
-              <h2 style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Endpoint Details</h2>
-              <div style={{ fontSize: '0.85rem' }}>
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <span style={{ color: methodColor(selected.method), fontWeight: 600 }}>{selected.method}</span>{' '}
-                  <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{selected.url}</span>
-                </div>
-                <div style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Status: {selected.status_code || 'unknown'}</div>
-                <div style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Content-Type: {selected.content_type || 'unknown'}</div>
-                <div style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Source: {selected.discovery_source}</div>
-                {selected.parent_url && (
-                  <div style={{ color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Parent: <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{selected.parent_url}</span></div>
-                )}
-
-                {selected.observations.length > 0 && (
-                  <>
-                    <h3 style={{ fontSize: '0.9rem', marginTop: '1rem', marginBottom: '0.5rem' }}>
-                      Observations ({selected.observations.length})
-                    </h3>
-                    {selected.observations.map((obs) => (
-                      <div key={obs.id} style={{ borderBottom: '1px solid var(--border)', padding: '0.5rem 0', fontSize: '0.8rem' }}>
-                        <div>{obs.request_method} {obs.request_url}</div>
-                        <div style={{ color: 'var(--text-muted)' }}>
-                          Status: {obs.response_status || '-'} | Source: {obs.source_type} | {new Date(obs.timestamp).toLocaleString()}
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-              <button onClick={() => setSelected(null)} style={{ marginTop: '1rem', width: '100%' }} type="button">Close</button>
-            </div>
-          )}
         </div>
       )}
     </div>

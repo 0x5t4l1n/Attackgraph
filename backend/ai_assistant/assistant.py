@@ -36,24 +36,57 @@ class AIAssistant:
     def redact_sensitive(self, text: str) -> str:
         return SENSITIVE_PATTERNS.sub("[REDACTED]", text)
 
+    def _build_graph_context(self, graph_data: dict) -> str:
+        nodes = graph_data.get("nodes", [])
+        edges = graph_data.get("edges", [])
+        findings = graph_data.get("findings", [])
+
+        if not nodes:
+            return "NO_DATA"
+
+        lines = [f"Nodes: {len(nodes)}, Edges: {len(edges)}"]
+
+        # Deduplicated endpoint list
+        seen: set[str] = set()
+        endpoints = []
+        for n in nodes[:30]:
+            label = n.get("label", "")
+            method = n.get("method", "")
+            observed = n.get("observed", True)
+            key = f"{method} {label}".strip()
+            if key not in seen:
+                seen.add(key)
+                obs = "obs" if observed else "inf"
+                entry = f"`{key}` ({obs})" if method else f"`{label}` ({obs})"
+                endpoints.append(entry)
+
+        lines.append("Endpoints: " + ", ".join(endpoints[:20]))
+
+        if findings:
+            f_list = [f"[{f.get('severity','?').upper()}] {f.get('title','')}" for f in findings[:8]]
+            lines.append("Findings: " + "; ".join(f_list))
+
+        return "\n".join(lines)
+
     async def summarize_graph(self, graph_data: dict) -> str:
         if not self.enabled or not self.client:
             return "AI is disabled. Enable it in settings to get AI-powered summaries."
 
-        safe_data = self.redact_sensitive(json.dumps(graph_data.get("statistics", {})))
-        nodes_summary: list[str] = []
-        for n in graph_data.get("nodes", [])[:50]:
-            nodes_summary.append(f"- {n.get('type')}: {n.get('label')}")
+        context = self._build_graph_context(graph_data)
 
-        prompt = (
-            "Summarize this web application's structure based on the following graph data.\n"
-            "Focus on: main entry points, sensitive operations, authentication mechanisms, "
-            "and potential security-relevant areas.\n\n"
-            f"Statistics: {safe_data}\n\n"
-            f"Sample nodes ({len(graph_data.get('nodes', []))} total):\n"
-            + "\n".join(nodes_summary[:30])
-            + "\n\nProvide a concise 2-3 paragraph summary."
-        )
+        if context == "NO_DATA":
+            return (
+                "## No Graph Data Available\n\n"
+                "The application graph is empty. Run a crawl or import traffic first, "
+                "then rebuild the graph before requesting an AI summary."
+            )
+
+        prompt = f"""You are a security researcher. Summarize this web application's attack surface based ONLY on the data below. Use Markdown. Use inline code for paths. Note what is observed vs inferred. State when authentication was not verified.
+
+Data:
+{context}
+
+Write sections: ## Entry Points, ## Security Observations, ## Potential Risks, ## Limitations. Be concise."""
 
         try:
             response = await self.client.chat.completions.create(
