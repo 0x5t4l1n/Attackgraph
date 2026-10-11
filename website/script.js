@@ -1,17 +1,13 @@
 'use strict';
 
-// ── Theme ──────────────────────────────────────────────────
-function getTheme() { return localStorage.getItem('ag-theme') || 'light'; }
+// ── Theme ───────────────────────────────────────────────────
+function getTheme() { return localStorage.getItem('ag-theme') || 'dark'; }
 
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('ag-theme', t);
-  const label = t === 'dark' ? 'Light Mode' : 'Dark Mode';
-  const short  = t === 'dark' ? 'Light' : 'Dark';
-  const el1 = document.getElementById('theme-label');
-  const el2 = document.getElementById('theme-label-mobile');
-  if (el1) el1.textContent = label;
-  if (el2) el2.textContent = short;
+  const el = document.getElementById('theme-label');
+  if (el) el.textContent = t === 'dark' ? 'Light' : 'Dark';
 }
 
 applyTheme(getTheme());
@@ -19,30 +15,22 @@ applyTheme(getTheme());
 document.getElementById('theme-toggle')?.addEventListener('click', () => {
   applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
 });
-document.getElementById('theme-toggle-mobile')?.addEventListener('click', () => {
-  applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
-});
 
-// Show mobile theme btn
-function syncMobileBtn() {
-  const m = document.getElementById('theme-toggle-mobile');
-  if (m) m.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-}
-syncMobileBtn();
-window.addEventListener('resize', syncMobileBtn);
-
-// ── Mobile menu ────────────────────────────────────────────
+// ── Mobile menu ──────────────────────────────────────────────
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobile-menu');
+
 if (hamburger && mobileMenu) {
   hamburger.addEventListener('click', () => {
     const open = mobileMenu.classList.toggle('open');
     hamburger.setAttribute('aria-expanded', String(open));
+    hamburger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   });
   mobileMenu.querySelectorAll('a').forEach(a =>
     a.addEventListener('click', () => {
       mobileMenu.classList.remove('open');
       hamburger.setAttribute('aria-expanded', 'false');
+      hamburger.setAttribute('aria-label', 'Open menu');
     })
   );
   document.addEventListener('click', e => {
@@ -53,79 +41,43 @@ if (hamburger && mobileMenu) {
   });
 }
 
-// ── Install tabs ───────────────────────────────────────────
+// ── Install tabs ─────────────────────────────────────────────
 document.querySelectorAll('.install-tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    document.querySelectorAll('.install-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.install-tab').forEach(t => {
+      t.classList.remove('active'); t.setAttribute('aria-selected', 'false');
+    });
     document.querySelectorAll('.install-pane').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    tab.setAttribute('aria-selected','true');
+    tab.classList.add('active'); tab.setAttribute('aria-selected', 'true');
     const pane = document.getElementById('tab-' + tab.dataset.tab);
     if (pane) pane.classList.add('active');
   });
   tab.addEventListener('keydown', e => {
     const all = [...document.querySelectorAll('.install-tab')];
     const i = all.indexOf(tab);
-    if (e.key === 'ArrowRight') { e.preventDefault(); all[(i+1) % all.length].focus(); }
-    if (e.key === 'ArrowLeft')  { e.preventDefault(); all[(i-1+all.length) % all.length].focus(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); all[(i + 1) % all.length].focus(); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); all[(i - 1 + all.length) % all.length].focus(); }
   });
 });
 
-// ── Scroll fade-in ─────────────────────────────────────────
-const fadeEls = document.querySelectorAll('.fade-in');
-
-if ('IntersectionObserver' in window) {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
-    });
-  }, { threshold: 0.04, rootMargin: '0px 0px -40px 0px' });
-  fadeEls.forEach(el => obs.observe(el));
-} else {
-  // No observer support — show everything immediately
-  fadeEls.forEach(el => el.classList.add('visible'));
-}
-
-// Safety net: force all visible after 1.2s regardless
-setTimeout(() => fadeEls.forEach(el => el.classList.add('visible')), 1200);
-
-// ── Active nav on scroll ───────────────────────────────────
-if ('IntersectionObserver' in window) {
-  const secObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        document.querySelectorAll('.nav-links a[href^="#"]').forEach(l => l.style.color = '');
-        const a = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
-        if (a) a.style.color = 'var(--gold)';
-      }
-    });
-  }, { rootMargin: '-30% 0px -60% 0px' });
-  document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
-}
-
-// ── FAQ accordion ──────────────────────────────────────────
+// ── FAQ accordion ────────────────────────────────────────────
 document.querySelectorAll('.faq-q').forEach(btn => {
   btn.addEventListener('click', () => {
-    const item   = btn.closest('.faq-item');
-    const answer = item.querySelector('.faq-a');
+    const answer = btn.closest('.faq-item').querySelector('.faq-a');
     const open   = btn.getAttribute('aria-expanded') === 'true';
 
-    // Close all others
+    // Close all
     document.querySelectorAll('.faq-q').forEach(b => {
       b.setAttribute('aria-expanded', 'false');
       b.closest('.faq-item').querySelector('.faq-a').classList.remove('open');
     });
 
-    // Toggle this one
+    // Toggle this
     if (!open) {
       btn.setAttribute('aria-expanded', 'true');
       answer.classList.add('open');
-      // Smooth scroll so question stays visible
-      setTimeout(() => btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
     }
   });
-
-  // Keyboard: Space/Enter open; Escape closes
   btn.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       btn.setAttribute('aria-expanded', 'false');
@@ -133,3 +85,33 @@ document.querySelectorAll('.faq-q').forEach(btn => {
     }
   });
 });
+
+// ── Fade-in ──────────────────────────────────────────────────
+const fadeEls = document.querySelectorAll('.fade-in');
+if ('IntersectionObserver' in window) {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+  fadeEls.forEach(el => obs.observe(el));
+} else {
+  fadeEls.forEach(el => el.classList.add('visible'));
+}
+// Safety net
+setTimeout(() => fadeEls.forEach(el => el.classList.add('visible')), 1000);
+
+// ── Active nav highlight ─────────────────────────────────────
+if ('IntersectionObserver' in window) {
+  const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+  const secObs   = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.removeAttribute('aria-current'));
+        const a = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+        if (a) a.setAttribute('aria-current', 'true');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('section[id], div[id]').forEach(s => secObs.observe(s));
+}
