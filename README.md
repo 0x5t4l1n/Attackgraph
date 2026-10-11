@@ -15,7 +15,7 @@ A graph-first application security testing platform — crawl targets, import tr
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=black)](https://react.dev)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24c8db?logo=tauri&logoColor=white)](https://tauri.app)
 [![AUR](https://img.shields.io/badge/AUR-attackgraph--bin-1793d1?logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/attackgraph-bin)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL--v3-blue)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-88%20passing-brightgreen)](#testing)
 
 </div>
@@ -662,7 +662,9 @@ Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for full guide
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+GNU Affero General Public License v3.0 (AGPL-3.0) — see [LICENSE](LICENSE) for details.
+
+This means you are free to use, study, modify, and distribute AttackGraph. If you run a modified version as a network service, you must make the modified source code available to users of that service.
 
 ---
 
