@@ -10,10 +10,23 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Redirect the old hostname without changing the existing security headers.
+[[redirects]]
+  from = "https://attackgraph.w4nn4d13.tech/*"
+  to = "https://attackgraph.w4nn4d13.in/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://attackgraph.w4nn4d13.tech/*"
+  to = "https://attackgraph.w4nn4d13.in/:splat"
+  status = 301
+  force = true
+
 # Redirect default Netlify subdomain to custom domain
 [[redirects]]
   from = "https://fluffy-donut-5ea1b7.netlify.app/*"
-  to = "https://attackgraph.w4nn4d13.tech/:splat"
+  to = "https://attackgraph.w4nn4d13.in/:splat"
   status = 301
   force = true
 
