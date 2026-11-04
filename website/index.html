@@ -13,8 +13,8 @@
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <link rel="stylesheet" href="style.css" />
-  <script>(function(){ document.documentElement.setAttribute('data-theme', localStorage.getItem('ag-theme') || 'dark'); })();</script>
+  <link rel="stylesheet" href="style.css?v=20261104" />
+  <script src="theme-init.js"></script>
 </head>
 <body>
 
@@ -113,9 +113,9 @@
     <div class="hero-preview" aria-label="AttackGraph application screenshot">
       <div class="preview-frame">
         <div class="preview-titlebar" aria-hidden="true">
-          <span class="preview-dot" style="background:#ff5f57"></span>
-          <span class="preview-dot" style="background:#ffbd2e"></span>
-          <span class="preview-dot" style="background:#28c840"></span>
+          <span class="preview-dot preview-dot-close"></span>
+          <span class="preview-dot preview-dot-minimize"></span>
+          <span class="preview-dot preview-dot-expand"></span>
           <span class="preview-title">AttackGraph — Project Overview</span>
         </div>
         <img
@@ -123,7 +123,7 @@
           alt="AttackGraph dashboard showing project overview with endpoint count, findings severity distribution, and application graph"
           width="836" height="471"
           loading="eager"
-          style="display:block; width:100%;"
+          class="preview-image"
         />
       </div>
     </div>
@@ -213,7 +213,7 @@
       </div>
       <div class="card fade-in">
         <div class="card-icon" aria-hidden="true">🤖</div>
-        <h3>AI Assistant <span style="font-size:.7rem;color:var(--text-muted);font-weight:400">(optional)</span></h3>
+        <h3>AI Assistant <span class="feature-optional">(optional)</span></h3>
         <p>Connect Ollama, OpenAI, Gemini, or OpenRouter for graph summarization. All core features work without AI.</p>
       </div>
     </div>
@@ -298,7 +298,7 @@ cd attackgraph-bin && makepkg -si</pre>
     </div>
 
     <div id="tab-appimage" class="install-pane fade-in" role="tabpanel">
-      <div class="install-block" style="max-width:640px">
+      <div class="install-block install-block-compact">
         <label>Any Linux x86_64 — portable, no installation needed</label>
         <pre>wget https://github.com/0x5t4l1n/Attackgraph/releases/download/v1.0.0/AttackGraph_1.0.0_amd64.AppImage
 chmod +x AttackGraph_1.0.0_amd64.AppImage
@@ -307,7 +307,7 @@ chmod +x AttackGraph_1.0.0_amd64.AppImage
     </div>
 
     <div id="tab-deb" class="install-pane fade-in" role="tabpanel">
-      <div class="install-block" style="max-width:640px">
+      <div class="install-block install-block-compact">
         <label>Debian, Ubuntu, and compatible distributions</label>
         <pre>wget https://github.com/0x5t4l1n/Attackgraph/releases/download/v1.0.0/AttackGraph_1.0.0_amd64.deb
 sudo dpkg -i AttackGraph_1.0.0_amd64.deb
@@ -316,7 +316,7 @@ attackgraph</pre>
     </div>
 
     <div id="tab-source" class="install-pane fade-in" role="tabpanel">
-      <div class="install-block" style="max-width:640px">
+      <div class="install-block install-block-compact">
         <label>Requires Python 3.11+, Node.js 18+, Rust 1.75+, webkit2gtk-4.1</label>
         <pre>git clone https://github.com/0x5t4l1n/Attackgraph.git
 cd Attackgraph
@@ -327,7 +327,7 @@ cargo tauri dev</pre>
       </div>
     </div>
 
-    <div class="callout fade-in" style="margin-top:2rem" role="note">
+    <div class="callout callout-spaced fade-in" role="note">
       <span aria-hidden="true">⚠</span>
       <p><strong>Authorized testing only.</strong> Only use AttackGraph against systems you own or have explicit written permission to test. The crawler respects <code>robots.txt</code> by default.</p>
     </div>
@@ -343,7 +343,7 @@ cargo tauri dev</pre>
     </div>
     <div class="grid-2 fade-in">
       <div>
-        <h3 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:1.25rem">Implemented in v1.0.0</h3>
+        <h3 class="roadmap-heading">Implemented in v1.0.0</h3>
         <div class="roadmap-item"><div class="roadmap-status done"></div><div><strong>Active async web crawler</strong><p>Scope enforcement, robots.txt, rate limiting</p></div></div>
         <div class="roadmap-item"><div class="roadmap-status done"></div><div><strong>Burp Suite XML import</strong><p>With credential redaction</p></div></div>
         <div class="roadmap-item"><div class="roadmap-status done"></div><div><strong>OpenAPI 2.0 / 3.0 / 3.1 import</strong></div></div>
@@ -356,7 +356,7 @@ cargo tauri dev</pre>
         <div class="roadmap-item"><div class="roadmap-status done"></div><div><strong>Optional AI assistant</strong><p>Ollama, OpenAI, Gemini, OpenRouter</p></div></div>
       </div>
       <div>
-        <h3 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:1.25rem">Planned</h3>
+        <h3 class="roadmap-heading roadmap-heading-muted">Planned</h3>
         <div class="roadmap-item"><div class="roadmap-status planned"></div><div><strong>Frontend unit tests</strong><p>Vitest + React Testing Library</p></div></div>
         <div class="roadmap-item"><div class="roadmap-status planned"></div><div><strong>Session and auth token tracking</strong></div></div>
         <div class="roadmap-item"><div class="roadmap-status planned"></div><div><strong>Dynamic crawling (Playwright)</strong><p>SPA and JavaScript-rendered pages</p></div></div>

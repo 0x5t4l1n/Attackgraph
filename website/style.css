@@ -601,3 +601,14 @@ footer {
   .footer-grid { grid-template-columns: 1fr; gap: 1.5rem; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }
+
+/* Keep presentation compatible with the existing strict Content Security Policy. */
+.preview-dot-close { background: #ff5f57; }
+.preview-dot-minimize { background: #ffbd2e; }
+.preview-dot-expand { background: #28c840; }
+.preview-image { display: block; width: 100%; }
+.feature-optional { font-size: .7rem; color: var(--text-muted); font-weight: 400; }
+.install-block-compact { max-width: 640px; }
+.callout-spaced { margin-top: 2rem; }
+.roadmap-heading { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 1.25rem; }
+.roadmap-heading-muted { color: var(--text-muted); }
